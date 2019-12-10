@@ -83,21 +83,20 @@ class Files:
 
         for i, line in enumerate(c):
             i_date, i_old_file, i_new_file = line.split(";")
-            print(f"{i_date}:\n{i_old_file}\n>  {i_new_file}")
+            print(f"{i_date}:\n{i_old_file}\n> {i_new_file}")
 
     @staticmethod
-    def rollback(old_path, old_name):
+    def rollback(old_path):
         line_to_delete = None
-        old_file = os.path.abspath(os.path.join(old_path, old_name))
         with open('.history', 'r') as f:
             content = f.readlines()
         content.reverse()
         for i, line in enumerate(content):
-            i_date, i_old_file, i_new_file = line.split(";")
-            if i_new_file == old_file:
+            i_date, i_old_path, i_new_path = line.split(";")
+            if i_new_path.strip() == old_path:
                 line_to_delete = line
-                shutil.move(old_file, i_old_file)
-                print(f"{old_file}\nRenamed to: {i_old_file}")
+                shutil.move(old_path, i_old_path)
+                print(f"{old_path}\n> {i_old_path}")
                 break
         if line_to_delete:
             with open(".history", "w") as f:

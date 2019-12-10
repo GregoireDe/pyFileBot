@@ -20,7 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description='pyFileBot')
 
     subparsers = parser.add_subparsers(help='Action to perform', dest='action')
-
+    subparsers.required = True
     choices_parser = argparse.ArgumentParser(add_help=False)
     movies = subparsers.add_parser('movies', help='Rename movies', parents=[choices_parser],
                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -31,11 +31,13 @@ def main():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     history = subparsers.add_parser('history', help='History of files renamed', parents=[choices_parser],
                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    subparsers.required = True
 
     for name, subp in subparsers.choices.items():
         if name in ["movies", "shows", "rollback"]:
             subp.add_argument('input', help='Input dirs/files to scan', nargs='*', type=str)
+            subp.add_argument('-r', '--recursive', help='Scan input dir recursively', action="store_true",
+                              default=False)
+            subp.add_argument('-c', '--clean', help='Clean empty dirs at the end', action="store_true", default=False)
 
         if name in ["movies", "shows"]:
             subp.add_argument('-o', '--output',
@@ -48,24 +50,22 @@ def main():
             subp.add_argument('-f', '--force', help='Force renaming if an output file already exists',
                               action="store_true", default=False)
             subp.add_argument('-i', '--ignore', help=f'Ignore {name} not found', action="store_true", default=False)
-            subp.add_argument('-c', '--clean', help='Clean empty dirs at the end', action="store_true", default=False)
-            subp.add_argument('-r', '--recursive', help='Scan input dir recursively', action="store_true",
-                              default=False)
+
 
     args = vars(parser.parse_args())
 
-    print("*** pyFileBot running ***\n")
+    print(f"*** pyFileBot > {args['action'].capitalize()} ***\n")
+
 
     if "history" in args['action']:
         Files.read_history()
 
     else:
-
         c = Store() if "shows" in args['action'] else None
         for i in args['input']:
             for old_path, old_name in Files.list(i, args['recursive']):
                 if "rollback" in args['action']:
-                    Files.rollback(old_path, old_name)
+                    Files.rollback(old_path)
                 else:
                     cls = globals()[DEFAULT_ACTION[args['action']]]
                     file = cls(old_name, args['ignore'], c)
