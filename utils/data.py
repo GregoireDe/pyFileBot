@@ -7,7 +7,7 @@ from Levenshtein import distance
 tvdb.KEYS.API_KEY = '3ac0c4741aaf457d899b38da6ced68aa'
 
 
-class Store:
+class Cache:
     show_list = {}
     show_title = {}
 
@@ -23,7 +23,7 @@ class File:
     title = None
     infos = None
 
-    def __init__(self, name, ignore, s: Store = None):
+    def __init__(self, name, ignore):
         self.file_infos = guessit(name)
         self.file_title = self.file_infos["title"]
         self.ignore = ignore
@@ -49,7 +49,7 @@ class File:
 
 class Movie(File):
 
-    def __init__(self, name, ignore=False, language="En"):
+    def __init__(self, name, ignore=False, language="En", c=None):
         File.__init__(self, name, ignore)
         o = IMDb()
         if "year" in self.file_title:
@@ -68,20 +68,20 @@ class Movie(File):
 
 class ShowEpisode(File):
 
-    def __init__(self, name, ignore=False, language="En", s: Store = None):
-        File.__init__(self, name, ignore, s)
-        if self.file_title not in s.show_list:
+    def __init__(self, name, ignore=False, language="EN", c: Cache = None):
+        File.__init__(self, name, ignore)
+        if self.file_title not in c.show_list:
             search = tvdb.Search()
             results = search.series(self.file_title, language=language)
             self.infos = self.find_infos(results, 'seriesName')
             episodes_detail = tvdb.Series(self.infos['id']).Episodes.all()
-            s.set_show(self.file_title, self.infos['seriesName'], episodes_detail)
+            c.set_show(self.file_title, self.infos['seriesName'], episodes_detail)
         try:
             setattr(self, 'season', self.file_infos['season'])
             setattr(self, 'ext', self.file_infos['container'])
             setattr(self, 'episode', self.file_infos['episode'])
-            setattr(self, 'show_title', s.show_title[self.file_title])
+            setattr(self, 'show_title', c.show_title[self.file_title])
             setattr(self, 'title',
-                    s.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"])
+                    c.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"])
         except Exception:
             raise Exception("Episode not found")

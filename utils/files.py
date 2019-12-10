@@ -87,20 +87,17 @@ class Files:
 
     @staticmethod
     def rollback(old_path):
-        line_to_delete = None
         with open('.history', 'r') as f:
             content = f.readlines()
         content.reverse()
         for i, line in enumerate(content):
             i_date, i_old_path, i_new_path = line.split(";")
             if i_new_path.strip() == old_path:
-                line_to_delete = line
                 shutil.move(old_path, i_old_path)
+                # Removing lines
+                content.remove(line)
+                with open(".history", "w") as f:
+                    content.reverse()
+                    f.writelines(content)
                 print(f"{old_path}\n> {i_old_path}")
                 break
-        if line_to_delete:
-            with open(".history", "w") as f:
-                content.reverse()
-                for i, line in enumerate(content):
-                    if line_to_delete != line:
-                        f.write(line)

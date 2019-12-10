@@ -3,7 +3,7 @@
 import os
 import argparse
 from utils.files import Files
-from utils.data import Store, Movie, ShowEpisode
+from utils.data import Cache, Movie, ShowEpisode
 
 DEFAULT_RULES = {
     "movies": "{title} ({year}).{ext}",
@@ -46,7 +46,7 @@ def main():
             subp.add_argument('-u', '--rules', help='Format to apply for renaming', type=str,
                               default=DEFAULT_RULES[name])
             subp.add_argument('-l', '--language', help=f'Output language file for the {name}', action="store_true",
-                              default="en")
+                              default="EN")
             subp.add_argument('-f', '--force', help='Force renaming if an output file already exists',
                               action="store_true", default=False)
             subp.add_argument('-i', '--ignore', help=f'Ignore {name} not found', action="store_true", default=False)
@@ -61,14 +61,14 @@ def main():
         Files.read_history()
 
     else:
-        c = Store() if "shows" in args['action'] else None
+        c = Cache() if "shows" in args['action'] else None
         for i in args['input']:
             for old_path, old_name in Files.list(i, args['recursive']):
                 if "rollback" in args['action']:
                     Files.rollback(old_path)
                 else:
                     cls = globals()[DEFAULT_ACTION[args['action']]]
-                    file = cls(old_name, args['ignore'], c)
+                    file = cls(old_name, args['ignore'], args['language'], c)
                     new_name = Files.process_rules(args['rules'], file)
                     Files.move(old_path, args['output'], new_name, args['force'])
             if args['clean']:
