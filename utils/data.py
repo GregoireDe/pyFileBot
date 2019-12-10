@@ -23,7 +23,7 @@ class File:
     title = None
     infos = None
 
-    def __init__(self, name, ignore):
+    def __init__(self, name, ignore, s: Store = None):
         self.file_infos = guessit(name)
         self.file_title = self.file_infos["title"]
         self.ignore = ignore
@@ -68,8 +68,8 @@ class Movie(File):
 
 class ShowEpisode(File):
 
-    def __init__(self, s: Store, name, ignore=False, language="En"):
-        File.__init__(self, name, ignore)
+    def __init__(self, name, ignore=False, language="En", s: Store = None):
+        File.__init__(self, name, ignore, s)
         if self.file_title not in s.show_list:
             search = tvdb.Search()
             results = search.series(self.file_title, language=language)

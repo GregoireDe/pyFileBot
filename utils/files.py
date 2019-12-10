@@ -2,7 +2,7 @@
 import os
 import shutil
 import re
-
+from datetime import datetime
 
 class Files:
 
@@ -64,6 +64,44 @@ class Files:
                         print(f"File skipped (already exists): {new_file}")
                         return
                 shutil.move(old_file, new_file)
-                print(f"{old_file}\n Renamed to: {new_file}")
+                Files.write_history(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{old_file};{new_file}\n")
+                print(f"{old_file}\n> {new_file}\n")
+
         except Exception as e:
             print(f"{e}")
+
+    @staticmethod
+    def write_history(content):
+        with open('.history', 'a') as f:
+            f.write(content)
+
+    @staticmethod
+    def read_history():
+        with open('.history', 'r') as f:
+            c = f.readlines()
+            c.reverse()
+
+        for i, line in enumerate(c):
+            i_date, i_old_file, i_new_file = line.split(";")
+            print(f"{i_date}:\n{i_old_file}\n>  {i_new_file}")
+
+    @staticmethod
+    def rollback(old_path, old_name):
+        line_to_delete = None
+        old_file = os.path.abspath(os.path.join(old_path, old_name))
+        with open('.history', 'r') as f:
+            content = f.readlines()
+        content.reverse()
+        for i, line in enumerate(content):
+            i_date, i_old_file, i_new_file = line.split(";")
+            if i_new_file == old_file:
+                line_to_delete = line
+                shutil.move(old_file, i_old_file)
+                print(f"{old_file}\nRenamed to: {i_old_file}")
+                break
+        if line_to_delete:
+            with open(".history", "w") as f:
+                content.reverse()
+                for i, line in enumerate(content):
+                    if line_to_delete != line:
+                        f.write(line)

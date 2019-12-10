@@ -5,49 +5,74 @@ import argparse
 from utils.files import Files
 from utils.data import Store, Movie, ShowEpisode
 
+DEFAULT_RULES = {
+    "movies": "{title} ({year}).{ext}",
+    "shows": "{show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}"
+}
+
+DEFAULT_ACTION = {
+    "movies": "Movie",
+    "shows": "ShowEpisode"
+}
+
 
 def main():
-    parser = argparse.ArgumentParser(description='pyFileBot', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('input', help='Input dirs/files to scan', nargs='+', type=str)
-    parser.add_argument('-o', '--output_dir', help='Output directory to move files', default=False)
-    parser.add_argument('-u', '--output_rules', help='Rules to apply for renaming', type=str, default=None)
-    parser.add_argument('-l', '--language', help='Output language file name/show',
-                        action="store_true", default="en")
-    parser.add_argument('-m', '--movies', help='Using Movies renammer instead of TV shows',
-                        action="store_true", default=False)
-    parser.add_argument('-f', '--output_force', help='Force renaming if an output file already exists',
-                        action="store_true", default=False)
-    parser.add_argument('-i', '--ignore', help='Ignore show/movie not found',
-                        action="store_true", default=False)
-    parser.add_argument('-c', '--clean', help='Clean empty dirs at the end', action="store_true",
-                        default=False)
-    parser.add_argument('-r', '--recursiv', help='Scan input dir recursively', action="store_true",
-                        default=False)
+    parser = argparse.ArgumentParser(description='pyFileBot')
+
+    subparsers = parser.add_subparsers(help='Action to perform', dest='action')
+
+    choices_parser = argparse.ArgumentParser(add_help=False)
+    movies = subparsers.add_parser('movies', help='Rename movies', parents=[choices_parser],
+                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    shows = subparsers.add_parser('shows', help='Rename TV shows', parents=[choices_parser],
+                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    rollback = subparsers.add_parser('rollback', help='Rollback files/folders based on the history',
+                                     parents=[choices_parser],
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    history = subparsers.add_parser('history', help='History of files renamed', parents=[choices_parser],
+                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    subparsers.required = True
+
+    for name, subp in subparsers.choices.items():
+        if name in ["movies", "shows", "rollback"]:
+            subp.add_argument('input', help='Input dirs/files to scan', nargs='*', type=str)
+
+        if name in ["movies", "shows"]:
+            subp.add_argument('-o', '--output',
+                              help='The directory to move renamed files to, if not specified the file working directory is used.',
+                              default=False)
+            subp.add_argument('-u', '--rules', help='Format to apply for renaming', type=str,
+                              default=DEFAULT_RULES[name])
+            subp.add_argument('-l', '--language', help=f'Output language file for the {name}', action="store_true",
+                              default="en")
+            subp.add_argument('-f', '--force', help='Force renaming if an output file already exists',
+                              action="store_true", default=False)
+            subp.add_argument('-i', '--ignore', help=f'Ignore {name} not found', action="store_true", default=False)
+            subp.add_argument('-c', '--clean', help='Clean empty dirs at the end', action="store_true", default=False)
+            subp.add_argument('-r', '--recursive', help='Scan input dir recursively', action="store_true",
+                              default=False)
+
     args = vars(parser.parse_args())
 
-    s = Store()
+    print("*** pyFileBot running ***\n")
 
-    print("*** pyFileBot running ***")
+    if "history" in args['action']:
+        Files.read_history()
 
-    if not args['movies']:
-        s = Store()
-        if not args["output_rules"]:
-            args["output_rules"] = "{show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}"
     else:
-        if not args["output_rules"]:
-            args["output_rules"] = "{title} ({year}).{ext}"
 
-    for i in args['input']:
-        for old_path, old_name in Files.list(i, args['recursiv']):
-            if args['movies']:
-                file = Movie(old_name, args['ignore'])
-            else:
-                file = ShowEpisode(s, old_name, args['ignore'])
-            new_name = Files.process_rules(args['output_rules'], file)
-            Files.move(old_path, args['output_dir'], new_name, args['output_force'])
-
-        if args['clean']:
-            Files.remove_empty_folders(i)
+        c = Store() if "shows" in args['action'] else None
+        for i in args['input']:
+            for old_path, old_name in Files.list(i, args['recursive']):
+                if "rollback" in args['action']:
+                    Files.rollback(old_path, old_name)
+                else:
+                    cls = globals()[DEFAULT_ACTION[args['action']]]
+                    file = cls(old_name, args['ignore'], c)
+                    new_name = Files.process_rules(args['rules'], file)
+                    Files.move(old_path, args['output'], new_name, args['force'])
+            if args['clean']:
+                Files.remove_empty_folders(i)
 
 
 if __name__ == "__main__":
