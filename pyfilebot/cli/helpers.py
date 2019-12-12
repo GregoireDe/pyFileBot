@@ -4,6 +4,8 @@ from __future__ import absolute_import
 
 from pyfilebot.utils import Files
 
+CONTEXT_SETTINGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
+
 DEFAULT_RULES = {
     "movies": "{title} ({year}).{ext}",
     "shows": "{show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}"
