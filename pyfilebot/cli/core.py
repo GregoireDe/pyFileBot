@@ -39,7 +39,7 @@ def cli():
 @cli.command()
 @option_dirs
 @option_renamer
-@click.argument('input', nargs='-1', required=True)
+@click.argument('input', nargs=-1, required=True)
 def movies(**args):
     """Rename movies"""
     args["c"] = None
