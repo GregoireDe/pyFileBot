@@ -24,6 +24,7 @@ def option_renamer(func):
                         help='Force renaming if an output file already exists, skip otherwise', default=False)(func)
     func = click.option('-i', '--ignore', is_flag=True, help=f'Ignore {func.__name__} not found',
                         default=False)(func)
+    func = click.option('-s', '--symlink', is_flag=True, default=False, help="Create symbolic links instead of moving the files.(Unix Only)")(func)
     func = click.option('-u', '--rules', help='Format to apply for renaming',
                         default=DEFAULT_RULES[func.__name__], show_default=True)(func)
     func = click.option('-o', '--output',
@@ -41,7 +42,7 @@ def cli():
 @option_renamer
 @click.argument('input', nargs=-1, required=True)
 def movies(**args):
-    """Rename movies"""
+    """Rename movies from INPUT files or folders"""
     args["c"] = None
     iter_files(do_rename, type="Movie", **args)
 
@@ -51,7 +52,7 @@ def movies(**args):
 @option_renamer
 @click.argument('input', nargs=-1, required=True)
 def shows(**args):
-    """Rename TV shows"""
+    """Rename TV shows from INPUT files or folders"""
     args["c"] = Cache()
     iter_files(do_rename, type="ShowEpisode", **args)
 
@@ -60,7 +61,7 @@ def shows(**args):
 @option_dirs
 @click.argument('input', nargs=-1, required=True)
 def rollback(**args):
-    """Rollback files/folders based on the history"""
+    """Rollback INPUT files or folders based on the history"""
     iter_files(do_rollback, **args)
 
 

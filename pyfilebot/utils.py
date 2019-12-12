@@ -59,24 +59,28 @@ class Files:
         return name
 
     @staticmethod
-    def move(old_file, output_dir, new_name, force, dry_run):
+    def rename(source_filepath, output_dir, dest_filename, force, symlink, dry_run):
         if output_dir:
-            new_file = os.path.abspath(os.path.join(output_dir, new_name))
+            dest_filepath = os.path.abspath(os.path.join(output_dir, dest_filename))
         else:
-            new_file = os.path.abspath(os.path.join(os.path.dirname(old_file), new_name))
-        os.makedirs(os.path.dirname(new_file), exist_ok=True)
+            dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
+        os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
         try:
-            if old_file != new_file:
-                if os.path.isfile(new_file):
+            if source_filepath != dest_filepath:
+                if os.path.isfile(dest_filepath):
                     if force:
-                        os.remove(new_file)
+                        os.remove(dest_filepath)
                     else:
-                        print(f"File skipped (already exists): {new_file}")
+                        print(f"File skipped (already exists): {dest_filepath}")
                         return
                 if not dry_run:
-                    shutil.move(old_file, new_file)
-                    Files.write_history(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{old_file};{new_file}\n")
-                print(f"{old_file}\n> {new_file}\n")
+                    if symlink:
+                        os.symlink(source_filepath, dest_filepath)
+                    else:
+                        shutil.move(source_filepath, dest_filepath)
+                        Files.write_history(
+                            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{source_filepath};{dest_filepath}\n")
+                print(f"{source_filepath}\n> {dest_filepath}\n")
 
         except Exception as e:
             print(f"{e}")
