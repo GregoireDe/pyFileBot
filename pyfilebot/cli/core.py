@@ -51,7 +51,6 @@ def cli():
 @click.argument('input', nargs=-1, required=True)
 def movies(**args):
     """Rename movies from INPUT files or folders"""
-    args["c"] = None
     iter_files(do_rename, cls=Movie, cache=None, **args)
 
 
