@@ -36,7 +36,6 @@ def option_renamer(func):
 def cli():
     pass
 
-
 @cli.command()
 @option_dirs
 @option_renamer

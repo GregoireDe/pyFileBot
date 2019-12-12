@@ -2,7 +2,17 @@
 import os
 import shutil
 import re
+import tempfile
+
+import string
+import socket
+
+from  random import choice, seed
 from datetime import datetime
+
+
+seed(socket.gethostname())
+TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.ascii_letters) for n in range(12)]))
 
 class Files:
 
@@ -73,21 +83,24 @@ class Files:
 
     @staticmethod
     def write_history(content):
-        with open('.history', 'a') as f:
+        with open(TEMP_HISTORY_FILE, 'a') as f:
             f.write(content)
 
     @staticmethod
     def read_history():
-        with open('.history', 'r') as f:
-            c = f.readlines()
-            c.reverse()
-        for i, line in enumerate(c):
-            i_date, i_old_file, i_new_file = line.split(";")
-            print(f"{i_date}:\n{i_old_file}\n> {i_new_file}")
+        if os.path.isfile(TEMP_HISTORY_FILE):
+            with open(TEMP_HISTORY_FILE, 'r') as f:
+                c = f.readlines()
+                c.reverse()
+            for i, line in enumerate(c):
+                i_date, i_old_file, i_new_file = line.split(";")
+                print(f"{i_date}:\n{i_old_file}\n> {i_new_file}")
+        else:
+            print(f"No history")
 
     @staticmethod
     def rollback(old_path):
-        with open('.history', 'r') as f:
+        with open(TEMP_HISTORY_FILE, 'r') as f:
             content = f.readlines()
         content.reverse()
         for i, line in enumerate(content):
@@ -97,7 +110,7 @@ class Files:
                 shutil.move(old_path, i_old_path)
                 # Removing lines
                 content.remove(line)
-                with open(".history", "w") as f:
+                with open(TEMP_HISTORY_FILE, "w") as f:
                     content.reverse()
                     f.writelines(content)
                 print(f"{old_path}\n> {i_old_path}")
