@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from __future__ import absolute_import
-from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files,  DEFAULT_RULES
+from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files, DEFAULT_RULES
 
 from pyfilebot.utils import Files
-from pyfilebot.main import Cache
+from pyfilebot.main import Cache, Movie, ShowEpisode
 
 import click
 
@@ -24,7 +24,8 @@ def option_renamer(func):
                         help='Force renaming if an output file already exists, skip otherwise', default=False)(func)
     func = click.option('-i', '--ignore', is_flag=True, help=f'Ignore {func.__name__} not found',
                         default=False)(func)
-    func = click.option('-s', '--symlink', is_flag=True, default=False, help="Create symbolic links instead of moving the files.(Unix Only)")(func)
+    func = click.option('-s', '--symlink', is_flag=True, default=False,
+                        help="Create symbolic links instead of moving the files.(Unix Only)")(func)
     func = click.option('-u', '--rules', help='Format to apply for renaming',
                         default=DEFAULT_RULES[func.__name__], show_default=True)(func)
     func = click.option('-o', '--output',
@@ -37,6 +38,7 @@ def option_renamer(func):
 def cli():
     pass
 
+
 @cli.command()
 @option_dirs
 @option_renamer
@@ -44,7 +46,7 @@ def cli():
 def movies(**args):
     """Rename movies from INPUT files or folders"""
     args["c"] = None
-    iter_files(do_rename, type="Movie", **args)
+    iter_files(do_rename, cls=Movie, cache=None, **args)
 
 
 @cli.command()
@@ -53,8 +55,7 @@ def movies(**args):
 @click.argument('input', nargs=-1, required=True)
 def shows(**args):
     """Rename TV shows from INPUT files or folders"""
-    args["c"] = Cache()
-    iter_files(do_rename, type="ShowEpisode", **args)
+    iter_files(do_rename, cls=ShowEpisode,  cache=Cache(), **args)
 
 
 @cli.command()

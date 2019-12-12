@@ -9,15 +9,9 @@ DEFAULT_RULES = {
     "shows": "{show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}"
 }
 
-DEFAULT_ACTION = {
-    "movies": "Movie",
-    "shows": "ShowEpisode"
-}
-
 
 def do_rename(old_path, old_name, **args):
-    cls = globals()[args['type']]
-    file = cls(old_name, args['ignore'], args['language'], args['c'])
+    file = args['cls'](old_name, args['ignore'], args['language'], args['cache'])
     new_name = Files.process_rules(args['rules'], file)
     Files.rename(old_path, args['output'], new_name, args['force'], args['symlink'], args['dry_run'])
 
