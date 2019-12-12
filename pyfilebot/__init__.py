@@ -1,0 +1,5 @@
+__author__ = 'Grégoire DELORME'
+__copyright__ = 'Copyright 2020 Grégoire DELORME'
+__license__ = 'MIT'
+__title__ = 'pyFileBot'
+__version__ = '0.0.1'

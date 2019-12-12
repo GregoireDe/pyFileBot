@@ -3,13 +3,9 @@
 import os
 import subprocess
 import shutil
-import json
 import argparse
-import string
 
-
-from utils.files import Files
-from random import randrange, sample, choice
+from random import choice
 
 
 def main():
@@ -33,7 +29,7 @@ def main():
 
 
     print("--------> Packaging")
-    cmd = f'venv/Scripts/pyarmor.exe -q  pack -x "--exclude venv --exclude tests" -e " --noconsole --distpath {args["out"]}  --icon=utils/favicons/{choice(favicons)} --onefile  --add-tmp_data build/config.json;. --add-tmp_data build/sk.pem;.  --add-tmp_data utils/text.txt;. --add-tmp_data venv/Scripts/px.exe;."  pyFileBot.py'
+    cmd = f'venv/Scripts/pyarmor.exe -q  pack -x "--exclude venv --exclude tests" -e " --noconsole --distpath {args["out"]}  --icon=utils/favicons/{choice(favicons)} --onefile  --add-tmp_data build/config.json;. --add-tmp_data build/sk.pem;.  --add-tmp_data utils/text.txt;. --add-tmp_data venv/Scripts/px.exe;."  main.pyOLD'
     p = subprocess.Popen(cmd, universal_newlines=True)
     p.wait()
     shutil.rmtree('./build', ignore_errors=True)

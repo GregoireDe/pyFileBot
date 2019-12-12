@@ -49,7 +49,7 @@ class Files:
         return name
 
     @staticmethod
-    def move(old_file, output_dir, new_name, output_force):
+    def move(old_file, output_dir, new_name, force, dry_run):
         if output_dir:
             new_file = os.path.abspath(os.path.join(output_dir, new_name))
         else:
@@ -58,13 +58,14 @@ class Files:
         try:
             if old_file != new_file:
                 if os.path.isfile(new_file):
-                    if output_force:
+                    if force:
                         os.remove(new_file)
                     else:
                         print(f"File skipped (already exists): {new_file}")
                         return
-                shutil.move(old_file, new_file)
-                Files.write_history(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{old_file};{new_file}\n")
+                if not dry_run:
+                    shutil.move(old_file, new_file)
+                    Files.write_history(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{old_file};{new_file}\n")
                 print(f"{old_file}\n> {new_file}\n")
 
         except Exception as e:
@@ -80,7 +81,6 @@ class Files:
         with open('.history', 'r') as f:
             c = f.readlines()
             c.reverse()
-
         for i, line in enumerate(c):
             i_date, i_old_file, i_new_file = line.split(";")
             print(f"{i_date}:\n{i_old_file}\n> {i_new_file}")
@@ -93,6 +93,7 @@ class Files:
         for i, line in enumerate(content):
             i_date, i_old_path, i_new_path = line.split(";")
             if i_new_path.strip() == old_path:
+                os.makedirs(os.path.dirname(i_old_path), exist_ok=True)
                 shutil.move(old_path, i_old_path)
                 # Removing lines
                 content.remove(line)

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os
+
 import argparse
+import click
 from utils.files import Files
-from utils.data import Cache, Movie, ShowEpisode
+from utils.data import Cache, ShowEpisode, Movie
 
 DEFAULT_RULES = {
     "movies": "{title} ({year}).{ext}",
@@ -15,8 +16,8 @@ DEFAULT_ACTION = {
     "shows": "ShowEpisode"
 }
 
-
 def main():
+
     parser = argparse.ArgumentParser(description='pyFileBot')
 
     subparsers = parser.add_subparsers(help='Action to perform', dest='action')
@@ -34,29 +35,30 @@ def main():
 
     for name, subp in subparsers.choices.items():
         if name in ["movies", "shows", "rollback"]:
-            subp.add_argument('input', help='Input dirs/files to scan', nargs='*', type=str)
-            subp.add_argument('-r', '--recursive', help='Scan input dir recursively', action="store_true",
+            subp.add_argument('input', help='Input director(y|ies)/file(s) to scan', nargs='+', type=str)
+            subp.add_argument('-r', '--recursive', help='Recursively lookup files in the director(y|ies)', action="store_true",
                               default=False)
             subp.add_argument('-c', '--clean', help='Clean empty dirs at the end', action="store_true", default=False)
 
         if name in ["movies", "shows"]:
             subp.add_argument('-o', '--output',
                               help='The directory to move renamed files to, if not specified the file working directory is used.',
-                              default=False)
+                              default=None)
             subp.add_argument('-u', '--rules', help='Format to apply for renaming', type=str,
                               default=DEFAULT_RULES[name])
             subp.add_argument('-l', '--language', help=f'Output language file for the {name}', action="store_true",
                               default="EN")
-            subp.add_argument('-f', '--force', help='Force renaming if an output file already exists',
+            subp.add_argument('-d', '--dry-run', help='Dry run your renaming', action="store_true", default=False)
+            subp.add_argument('-f', '--force', help='Force renaming if an output file already exists, skip otherwise',
                               action="store_true", default=False)
             subp.add_argument('-i', '--ignore', help=f'Ignore {name} not found', action="store_true", default=False)
 
-
     args = vars(parser.parse_args())
+
 
     print(f"*** pyFileBot > {args['action'].capitalize()} ***\n")
 
-
+    args = ""
     if "history" in args['action']:
         Files.read_history()
 
@@ -70,10 +72,10 @@ def main():
                     cls = globals()[DEFAULT_ACTION[args['action']]]
                     file = cls(old_name, args['ignore'], args['language'], c)
                     new_name = Files.process_rules(args['rules'], file)
-                    Files.move(old_path, args['output'], new_name, args['force'])
+                    Files.move(old_path, args['output'], new_name, args['force'], args['dry-run'])
             if args['clean']:
                 Files.remove_empty_folders(i)
 
 
 if __name__ == "__main__":
-    main()
+    cli()

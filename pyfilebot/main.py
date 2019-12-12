@@ -43,6 +43,7 @@ class File:
                     print(f"{v[title]}: {k}")
                 n = input("Enter the right one: ")
                 return all_results[int(n)]
+            return None
         else:
             raise Exception("Show/Movie not found")
 
@@ -56,14 +57,16 @@ class Movie(File):
             self.file_title = f"{self.file_title} {self.file_infos['year']}"
         results = o.search_movie(self.file_title)
         self.infos = self.find_infos(results, "title")
+        if not self.infos and ignore:
+            return
         m = o.get_movie(self.infos.movieID)
         self.infos.update(m)
         # f2 = helpers.getAKAsInLanguage(f, language)
         if re.findall(r"([0-9]{4})", self.infos["title"]):
             self.infos["title"] = re.compile(r'(\([0-9]{4}\))').sub('', self.infos["title"]).strip()
-        setattr(self, 'ext', self.file_infos['container'])
-        setattr(self, 'title', self.infos["title"])
-        setattr(self, 'year', re.findall(r"([0-9]{4})", self.infos['original air date'])[0])
+        self.ext = self.file_infos['container']
+        self.title = self.infos["title"]
+        self.year = re.findall(r"([0-9]{4})", self.infos['original air date'])[0]
 
 
 class ShowEpisode(File):
@@ -74,14 +77,14 @@ class ShowEpisode(File):
             search = tvdb.Search()
             results = search.series(self.file_title, language=language)
             self.infos = self.find_infos(results, 'seriesName')
-            episodes_detail = tvdb.Series(self.infos['id']).Episodes.all()
-            c.set_show(self.file_title, self.infos['seriesName'], episodes_detail)
+            if not ignore:
+                episodes_detail = tvdb.Series(self.infos['id']).Episodes.all()
+                c.set_show(self.file_title, self.infos['seriesName'], episodes_detail)
+        self.season = self.file_infos['season']
+        self.ext = self.file_infos['container']
+        self.episode = self.file_infos['episode']
         try:
-            setattr(self, 'season', self.file_infos['season'])
-            setattr(self, 'ext', self.file_infos['container'])
-            setattr(self, 'episode', self.file_infos['episode'])
-            setattr(self, 'show_title', c.show_title[self.file_title])
-            setattr(self, 'title',
-                    c.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"])
+            self.show_title = c.show_title[self.file_title]
+            self.title = c.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"]
         except Exception:
             raise Exception("Episode not found")
