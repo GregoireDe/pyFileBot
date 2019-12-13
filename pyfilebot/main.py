@@ -35,12 +35,12 @@ class File:
             for k, v in list(enumerate(all_results))[:max_depth]:
                 if self.file_title.lower() == all_results[k][title].lower():
                     return all_results[k]
-                elif distance(self.file_title.lower(), all_results[k][title].lower()) < 3:
+                elif distance(self.file_title, all_results[k][title]) < 1:
                     return all_results[k]
             if not self.ignore:
                 print(f"Multiple name found for '{self.file_title}'")
                 for k, v in enumerate(all_results):
-                    print(f"{v[title]}: {k}")
+                    print(f"{k}: {v[title]}")
                 n = input("Enter the right one: ")
                 return all_results[int(n)]
             return None
@@ -50,7 +50,7 @@ class File:
 
 class Movie(File):
 
-    def __init__(self, name, ignore=False, language="En", c=None):
+    def __init__(self, name, ignore=False, language="en", c=None):
         File.__init__(self, name, ignore)
         o = IMDb()
         if "year" in self.file_title:
@@ -71,7 +71,7 @@ class Movie(File):
 
 class ShowEpisode(File):
 
-    def __init__(self, name, ignore=False, language="EN", c: Cache = None):
+    def __init__(self, name, ignore=False, language="en", c: Cache = None):
         File.__init__(self, name, ignore)
         if self.file_title not in c.show_list:
             search = tvdb.Search()

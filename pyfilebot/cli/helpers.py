@@ -13,9 +13,12 @@ DEFAULT_RULES = {
 
 
 def do_rename(old_path, old_name, **args):
-    file = args['cls'](old_name, args['ignore'], args['language'], args['cache'])
-    new_name = Files.process_rules(args['rules'], file)
-    Files.rename(old_path, args['output'], new_name, args['force'], args['symlink'], args['dry_run'])
+    try:
+        file = args['cls'](old_name, args['ignore'], args['language'], args['cache'])
+        new_name = Files.process_rules(args['rules'], file)
+        Files.rename(old_path, args['output'], new_name, args['force'], args['action'], args['dry_run'])
+    except Exception as e:
+        print(e)
 
 
 def do_rollback(old_path, **args):

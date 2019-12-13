@@ -59,12 +59,11 @@ class Files:
         return name
 
     @staticmethod
-    def rename(source_filepath, output_dir, dest_filename, force, symlink, dry_run):
+    def rename(source_filepath, output_dir, dest_filename, force, action, dry_run):
         if output_dir:
             dest_filepath = os.path.abspath(os.path.join(output_dir, dest_filename))
         else:
             dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
-        os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
         try:
             if source_filepath != dest_filepath:
                 if os.path.isfile(dest_filepath):
@@ -74,8 +73,11 @@ class Files:
                         print(f"File skipped (already exists): {dest_filepath}")
                         return
                 if not dry_run:
-                    if symlink:
+                    os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
+                    if action == "symlink":
                         os.symlink(source_filepath, dest_filepath)
+                    elif action == "copy":
+                        pass
                     else:
                         shutil.move(source_filepath, dest_filepath)
                         Files.write_history(
