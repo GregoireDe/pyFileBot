@@ -7,12 +7,12 @@ import tempfile
 import string
 import socket
 
-from  random import choice, seed
+from random import choice, seed
 from datetime import datetime
-
 
 seed(socket.gethostname())
 TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.ascii_letters) for n in range(12)]))
+
 
 class Files:
 
@@ -60,30 +60,26 @@ class Files:
 
     @staticmethod
     def rename(source_filepath, output_dir, dest_filename, force, action, dry_run):
-        if output_dir:
-            dest_filepath = os.path.abspath(os.path.join(output_dir, dest_filename))
-        else:
-            dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
         try:
-            if source_filepath != dest_filepath:
-                if os.path.isfile(dest_filepath):
-                    if force:
-                        os.remove(dest_filepath)
-                    else:
-                        print(f"File skipped (already exists): {dest_filepath}")
-                        return
-                if not dry_run:
-                    os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
-                    if action == "symlink":
-                        os.symlink(source_filepath, dest_filepath)
-                    elif action == "copy":
-                        pass
-                    else:
-                        shutil.move(source_filepath, dest_filepath)
-                        Files.write_history(
-                            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{source_filepath};{dest_filepath}\n")
-                print(f"{source_filepath}\n> {dest_filepath}\n")
-
+            dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
+            if output_dir:
+                dest_filepath = os.path.abspath(os.path.join(output_dir, dest_filename))
+            if source_filepath == dest_filepath or (os.path.isfile(dest_filepath) and not force):
+                print(f"File skipped (already exists): {dest_filepath}")
+                return
+            if os.path.isfile(dest_filepath) and force:
+                os.remove(dest_filepath)
+            if not dry_run:
+                os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
+                if action == "symlink":
+                    os.symlink(source_filepath, dest_filepath)
+                elif action == "copy":
+                    shutil.copy2(source_filepath, dest_filepath)
+                else:
+                    shutil.move(source_filepath, dest_filepath)
+                Files.write_history(
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{source_filepath};{dest_filepath}\n")
+            print(f"{source_filepath}\n> {dest_filepath}\n")
         except Exception as e:
             print(f"{e}")
 

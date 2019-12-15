@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
 from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files, DEFAULT_RULES, CONTEXT_SETTINGS
 
 from pyfilebot.utils import Files
