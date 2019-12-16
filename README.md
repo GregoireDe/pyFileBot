@@ -3,7 +3,7 @@
 > *Media file renamer using TheTVDB and IMDb databases.*
 
 
-The tool is not based on the great FileBot, but since it wasn't free and over featured for my need, I developped a little python script. 
+The tool is not based on  FileBot, but since it wasn't free and over featured for my needs, I developped my own. 
 
 
 ## In brief
@@ -23,7 +23,7 @@ The tool is not based on the great FileBot, but since it wasn't free and over fe
 - **Custom** output file format
 - Choose between **copy, move or symlinks**
 - Manage user input or pass on **unknown** files
-- Keep an **history** and allow run **rollback** in case of issue.
+- Keep an **history** and **rollback** in case of issue.
 
 ###### TODO
 
@@ -33,14 +33,16 @@ The tool is not based on the great FileBot, but since it wasn't free and over fe
 
 ## Installation
 
-
+```text
+$ pip install pyfilebot
+```
 
 ## Examples
 
 ##### Check help menus to list all available options
 
 
-```bash
+```text
 $ pyfilebot -h
 Usage: pyfilebot [OPTIONS] COMMAND [ARGS]...
 
@@ -54,7 +56,7 @@ Commands:
   shows     Rename TV shows from INPUT files or folders
 ```
 
-```bash
+```text
 $ pyfilebot movies -h
 Usage: pyfilebot movies [OPTIONS] INPUT...
 
@@ -79,5 +81,3 @@ Options:
 ```
 
 ---
-
-## Installation
