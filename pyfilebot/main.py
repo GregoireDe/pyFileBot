@@ -114,8 +114,10 @@ class ShowEpisode(File):
             c.set_show(self.file_title, self.infos['seriesName'], show_details)
 
         self.season = self.file_infos['season']
+        self.season_0 = self.season.rjust(2, '0')
         self.ext = self.file_infos['container']
         self.episode = self.file_infos['episode']
+        self.episode_0 = self.episode.rjust(2, '0')
         try:
             self.show_title = c.show_title[self.file_title]
             self.title = c.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"]

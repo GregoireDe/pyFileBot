@@ -47,16 +47,11 @@ class Files:
 
     @staticmethod
     def process_rules(name, details):
-        keys = re.findall(r"\{(\w+)\}", name)
-        for key in keys:
-            if key in list(details.__dict__.keys()):
-                name = name.replace(f"{{{key}}}", str(getattr(details, key)))
-            elif key == "season_0" or key == "episode_0":
-                name = name.replace(f"{{{key}}}", str(getattr(details, key[:-2])).rjust(2, '0'))
-            else:
-                raise Exception(f"Unknown {key} variable")
-        name = re.sub(r'[*?:"<>|]', "", name)
-        return name
+        try:
+            name = name.format(**details)
+            return re.sub(r'[*?:"<>|]', "", name)
+        except KeyError as e:
+            raise Exception(e)
 
     @staticmethod
     def rename(source_filepath, output_dir, dest_filename, force, action, dry_run):
