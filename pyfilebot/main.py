@@ -22,6 +22,7 @@ class Cache:
 class File:
     title = None
     infos = None
+    imdb = None
 
     def __init__(self, name, ignore):
         self.file_infos = guessit(name)
@@ -30,9 +31,9 @@ class File:
 
     def search_database(self, database_name, file_title, language):
         if database_name == "imdb":
-            o = IMDb()
-            r = o.search_movie(file_title)
-            return o, r
+            self.imdb = IMDb()
+            r = self.imdb.search_movie(file_title)
+            return r
         else:
             o = tvdb.Search()
             r = o.series(file_title, language=language)
@@ -59,9 +60,9 @@ class File:
             return all_results[int(n)]
         return None
 
-    def get_details(self, database_name, id, o=None):
+    def get_details(self, database_name, id):
         if database_name == "imdb":
-            return o.get_movie(id)
+            return self.imdb.get_movie(id)
         else:
             return tvdb.Series(id).Episodes.all()
 
@@ -75,7 +76,7 @@ class Movie(File):
             self.file_title = f"{self.file_title} ({self.file_infos['year']})"
 
         # Search IDMB database with file name
-        o, movies = self.search_database("imdb", self.file_title, language)
+        movies = self.search_database("imdb", self.file_title, language)
         # Find the best match
         self.infos = self.find_infos(movies, "title")
 
@@ -83,7 +84,7 @@ class Movie(File):
             return
 
         # Get movie details
-        movie_details = self.get_details("imdb", self.infos.movieID, o)
+        movie_details = self.get_details("imdb", self.infos.movieID)
 
         # f2 = helpers.getAKAsInLanguage(f, language)
         self.title = movie_details["title"]
