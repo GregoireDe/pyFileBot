@@ -71,7 +71,7 @@ Options:
   -u, --rules TEXT              Format to apply for renaming  [default:
                                 {show_title}/Season {season}/{show_title} -
                                 S{season_0}E{episode_0} - {title}.{ext}]
-  -a, --action [move|sym|copy]  Use move, copy or symlink files to the
+  -a, --action [move|copy|sym]  Use move, copy or symlink files to the
                                 destination  [default: move]
   -i, --ignore                  Ignore shows not found, best choice for non-
                                 interactive mode
