@@ -8,20 +8,28 @@ tvdb.KEYS.API_KEY = '3ac0c4741aaf457d899b38da6ced68aa'
 
 
 class Cache:
-    show_list = {}
-    show_title = {}
+    """Show cache storage
 
-    def set_show(self, file_title, show_title, show_details):
-        self.show_list[file_title] = {}
+    Attributes:
+        show (dict): show dict
+    """
+    show = {}
+
+    def caching(self, file_title, show_title, show_details):
+        self.show[file_title] = {"details": None, "title": None}
         show_details = {f"{episode['airedSeason']}{episode['airedEpisodeNumber']}": episode['episodeName'] for
                         episode in show_details}
-        self.show_list[file_title].update(show_details)
-        self.show_title = {file_title: show_title}
+        self.show[file_title]["details"].update(show_details)
+        self.show[file_title]["title"].update(show_title)
 
 
 class File:
-    title = None
-    infos = None
+    """Media file object
+
+    Attributes:
+        imdb: imdb object
+
+    """
     imdb = None
 
     def __init__(self, name, ignore):
@@ -40,6 +48,18 @@ class File:
             return r
 
     def find_infos(self, all_results, title, max_depth=3):
+        """Select into IMDb or TheTVDB a media based on his title
+
+        Args:
+            all_results (str): All results coming from IMDb or The TDVD
+            title (str): Media title
+
+        Raises:
+            Exception: Generic exception
+
+        Returns:
+            dict: All infos regarding the media chosen
+        """
         if not all_results:
             raise Exception("Show/Movie not found")
 
@@ -104,14 +124,13 @@ class ShowEpisode(File):
             o, shows = self.search_database("tvdb", self.file_title, language)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
-
+            # Ignore unknown shows
             if not self.infos and ignore:
                 return
-
             # Get show details
             show_details = self.get_details("tvdb", self.infos['id'])
-            # Store in cache
-            c.set_show(self.file_title, self.infos['seriesName'], show_details)
+            # Caching the show
+            c.caching(self.file_title, self.infos['seriesName'], show_details)
 
         self.season = self.file_infos['season']
         self.season_0 = self.season.rjust(2, '0')
@@ -119,7 +138,7 @@ class ShowEpisode(File):
         self.episode = self.file_infos['episode']
         self.episode_0 = self.episode.rjust(2, '0')
         try:
-            self.show_title = c.show_title[self.file_title]
-            self.title = c.show_list[self.file_title][f"{self.file_infos['season']}{self.file_infos['episode']}"]
+            self.show_title = c.show[self.file_title]["title"]
+            self.title = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"]
         except Exception:
             raise Exception("Episode not found")

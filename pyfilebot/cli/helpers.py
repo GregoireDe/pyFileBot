@@ -12,11 +12,11 @@ DEFAULT_RULES = {
 }
 
 
-def do_rename(old_path, old_name, **args):
+def do_rename(filepath, filename, **args):
     try:
-        file = args['cls'](old_name, args['ignore'], args['language'], args['cache'])
+        file = args['cls'](filename, args['ignore'], args['language'], args['cache'])
         new_name = Files.process_rules(args['rules'], file)
-        Files.rename(old_path, args['output'], new_name, args['force'], args['action'], args['dry_run'])
+        Files.rename(filepath, args['output'], new_name, args['force'], args['action'], args['dry_run'])
     except Exception as e:
         print(e)
 
@@ -26,4 +26,4 @@ def do_rollback(old_path, **args):
 
 
 def iter_files(func, **args):
-    [func(old_path, old_name, **args) for i in args['input'] for old_path, old_name in Files.list(i, args['recursive'])]
+    [func(filepath, filename, **args) for i in args['input'] for filepath, filename in Files.list(i, args['recursive'])]
