@@ -25,8 +25,8 @@ class cption:
                             help='Force renaming if an output file already exists, ignore otherwise', default=False)(func)
         func = click.option('-i', '--ignore', is_flag=True, help=f'Ignore {func.__name__} not found, best choice for non-interactive mode',
                             default=False)(func)
-        func = click.option('-a', '--action', is_flag=True, type=click.Choice(['symlink', 'copy', 'move']), default="move", show_default=True,
-                            help="Use move, copy or symlink files to the destination")(func)
+        func = click.option('-a', '--action', type=click.Choice(['move','sym', 'copy']), default="move", show_default=True,
+                            help="Move, copy or symlink files to the destination")(func)
         func = click.option('-u', '--rules', help='Format to apply for renaming',
                             default=DEFAULT_RULES[func.__name__], show_default=True)(func)
         func = click.option('-o', '--output',

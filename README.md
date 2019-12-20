@@ -63,21 +63,23 @@ Usage: pyfilebot movies [OPTIONS] INPUT...
   Rename movies from INPUT files or folders
 
 Options:
-  -r, --recursive    Recursively lookup files in the director(y|ies)
-  -c, --clean        Clean empty dirs at the end
-  -o, --output TEXT  The directory to move renamed files to, if not specified
-                     the input working directory is used
-  -u, --rules TEXT   Format to apply for renaming  [default: {title}
-                     ({year}).{ext}]
-  -a, --action       Use move, copy or symlink files to the destination
-                     [default: move]
-  -i, --ignore       Ignore movies not found
-  -f, --force        Force renaming if an output file already exists, ignore
-                     otherwise
-  -d, --dry-run      Dry run your renaming
-  -l, --language     Output language file for movies
-  -h, --help         Show this message and exit.
-
+  -r, --recursive               Recursively lookup files in the
+                                director(y|ies)
+  -c, --clean                   Clean empty dirs at the end
+  -o, --output TEXT             The directory to move renamed files to, if not
+                                specified the input working directory is used
+  -u, --rules TEXT              Format to apply for renaming  [default:
+                                {show_title}/Season {season}/{show_title} -
+                                S{season_0}E{episode_0} - {title}.{ext}]
+  -a, --action [move|sym|copy]  Use move, copy or symlink files to the
+                                destination  [default: move]
+  -i, --ignore                  Ignore shows not found, best choice for non-
+                                interactive mode
+  -f, --force                   Force renaming if an output file already
+                                exists, ignore otherwise
+  -d, --dry-run                 Dry run your renaming
+  -l, --language TEXT           Output language file for shows  [default: en]
+  -h, --help                    Show this message and exit.
 ```
 
 ---

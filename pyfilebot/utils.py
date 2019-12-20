@@ -66,7 +66,7 @@ class Files:
                 os.remove(dest_filepath)
             if not dry_run:
                 os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
-                if action == "symlink":
+                if action == "sym":
                     os.symlink(source_filepath, dest_filepath)
                 elif action == "copy":
                     shutil.copy2(source_filepath, dest_filepath)
