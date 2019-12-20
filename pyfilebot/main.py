@@ -107,11 +107,11 @@ class Movie(File):
         movie_details = self.get_details("imdb", self.infos.movieID)
 
         # f2 = helpers.getAKAsInLanguage(f, language)
-        self.title = movie_details["title"]
-        self.title = re.compile(r'(\([0-9]{4}\))').sub('', self.title).strip() if re.findall(r"([0-9]{4})",
-                                                                                             self.title) else self.title
+        self.t = movie_details["title"]
+        self.t = re.compile(r'(\([0-9]{4}\))').sub('', self.t).strip() if re.findall(r"([0-9]{4})",
+                                                                                             self.t) else self.t
         self.ext = self.file_infos['container']
-        self.year = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
+        self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
 
 
 class ShowEpisode(File):
@@ -132,13 +132,13 @@ class ShowEpisode(File):
             # Caching the show
             c.caching(self.file_title, self.infos['seriesName'], show_details)
 
-        self.season = self.file_infos['season']
-        self.season_0 = self.season.rjust(2, '0')
+        self.s = self.file_infos['season']
+        self.s00 = self.s.rjust(2, '0')
         self.ext = self.file_infos['container']
-        self.episode = self.file_infos['episode']
-        self.episode_0 = self.episode.rjust(2, '0')
+        self.e = self.file_infos['episode']
+        self.e00 = self.e.rjust(2, '0')
         try:
-            self.show_title = c.show[self.file_title]["title"]
-            self.title = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"]
+            self.n = c.show[self.file_title]["title"]
+            self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"]
         except Exception:
             raise Exception("Episode not found")

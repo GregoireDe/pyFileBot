@@ -69,8 +69,7 @@ Options:
   -o, --output TEXT             The directory to move renamed files to, if not
                                 specified the input working directory is used
   -u, --rules TEXT              Format to apply for renaming  [default:
-                                {show_title}/Season {season}/{show_title} -
-                                S{season_0}E{episode_0} - {title}.{ext}]
+                                {n}/Season {s}/{n} - S{s00}E{e00} - {t}.{ext}]
   -a, --action [move|copy|sym]  Use move, copy or symlink files to the
                                 destination  [default: move]
   -i, --ignore                  Ignore shows not found, best choice for non-
@@ -80,6 +79,15 @@ Options:
   -d, --dry-run                 Dry run your renaming
   -l, --language TEXT           Output language file for shows  [default: en]
   -h, --help                    Show this message and exit.
+```
+
+## Rules
+
+You can easily define your own episode and movie naming schemes. It uses Python format strings
+```text
+--rules {show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}]
+>
+Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
 ```
 
 ---
