@@ -85,9 +85,22 @@ Options:
 
 You can easily define your own episode and movie naming schemes. It uses Python format strings
 ```text
---rules {show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}]
+--rules {n}/Season {s}/{n} - S{s00}E{e00} - {t}.{ext}
 >
 Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
 ```
+##### Bindings
+
+n: Movie / Show name
+y: Year air date
+t: Episode name
+s: Season
+s00: Season (2 digits format)
+e: Episode 
+e00: Episode (2 digits format)
+
+##### Special bindings
+
+plex: Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
 
 ---
