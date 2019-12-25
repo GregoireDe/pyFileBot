@@ -104,11 +104,11 @@ Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.m
 
 ##### Special bindings
 
-Using series
+```text
+$ pyfilebot shows --rules {plex} ./
+Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
 
-plex: Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
-
-Using movies
-
+$ pyfilebot movies --rules {plex} ./
 Ad Astra (2019)/Ad Astra (2019).mkv
+```
 
