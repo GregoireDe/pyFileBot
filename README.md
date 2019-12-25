@@ -101,20 +101,6 @@ Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.m
 | s00 | Season (2 digits format)  |   
 | e | Episode  |   
 | e00 | Episode (2 digits format)  |   
-   
-n: Movie / Show name
-
-y: Year air date
-
-t: Episode name
-
-s: Season
-
-s00: Season (2 digits format)
-
-e: Episode 
-
-e00: Episode (2 digits format)
 
 ##### Special bindings
 
