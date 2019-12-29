@@ -110,7 +110,7 @@ class Movie(File):
         self.t = movie_details["title"]
         self.t = re.compile(r'(\([0-9]{4}\))').sub('', self.t).strip() if re.findall(r"([0-9]{4})",
                                                                                              self.t) else self.t
-        self.ext = self.file_infos['container']
+        self.x = self.file_infos['container']
         self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
 
 
@@ -134,7 +134,7 @@ class ShowEpisode(File):
 
         self.s = self.file_infos['season']
         self.s00 = self.s.rjust(2, '0')
-        self.ext = self.file_infos['container']
+        self.x = self.file_infos['container']
         self.e = self.file_infos['episode']
         self.e00 = self.e.rjust(2, '0')
         try:

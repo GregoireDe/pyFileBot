@@ -7,15 +7,15 @@ from pyfilebot.utils import Files
 CONTEXT_SETTINGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
 
 DEFAULT_RULES = {
-    "movies": "{title} ({year}).{ext}",
-    "shows": "{show_title}/Season {season}/{show_title} - S{season_0}E{episode_0} - {title}.{ext}"
+    "movies": "{t} ({y})/{t} ({y}).{x}",
+    "shows": "{t}/Season {s}/{t} - S{s00}E{e00} - {n}.{x}"
 }
 
 
 def do_rename(filepath, filename, **args):
     try:
         file = args['cls'](filename, args['ignore'], args['language'], args['cache'])
-        new_name = Files.process_rules(args['rules'], file)
+        new_name = Files.process_rules(args['rules'],args['cls'].__class__.__name__, file)
         Files.rename(filepath, args['output'], new_name, args['force'], args['action'], args['dry_run'])
     except Exception as e:
         print(e)

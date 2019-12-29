@@ -13,6 +13,11 @@ from datetime import datetime
 seed(socket.gethostname())
 TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.ascii_letters) for n in range(12)]))
 
+SPECIAL_RULES = {
+    "plex": {"Movie": "{t} ({y})/{t} ({y}).{x}",
+             "ShowEpisode": "{t}/Season {s}/{t} - S{s00}E{e00} - {n}.{x}"}
+}
+
 
 class Files:
 
@@ -46,8 +51,11 @@ class Files:
                     break
 
     @staticmethod
-    def process_rules(name, details):
+    def process_rules(name, type, details):
         try:
+            for r in SPECIAL_RULES.keys():
+                if r == name:
+                    name = SPECIAL_RULES[name][type]
             name = name.format(**details)
             return re.sub(r'[*?:"<>|]', "", name)
         except KeyError as e:
