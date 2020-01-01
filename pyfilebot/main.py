@@ -137,7 +137,7 @@ class ShowEpisode(File):
         self.e = str(self.file_infos['episode'])
         self.e00 = self.e.rjust(2, '0')
         try:
-            self.n = c.show[self.file_title]["title"]
-            self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"]
+            self.n = c.show[self.file_title]["title"].strip()
+            self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"].strip()
         except Exception:
-            raise Exception("Episode not found")
+            raise Exception(f"Episode not found: {name}")

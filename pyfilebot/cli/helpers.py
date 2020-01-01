@@ -10,21 +10,23 @@ DEFAULT_RULES = {
     "movies": "{n} ({y})/{n} ({y}).{x}",
     "shows": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"
 }
-#iter_files(do_rename, cls=ShowEpisode, cache=Cache(), **args
+
+
+# iter_files(do_rename, cls=ShowEpisode, cache=Cache(), **args
 
 def do_rename(filepath, filename, **args):
     try:
         file = args['cls'](filename, args['ignore'], args['language'], args['cache'])
-        new_name = Files.process_rules(args['rules'],"ShowEpisode", file.__dict__)
+        new_name = Files.process_rules(args['rules'], "ShowEpisode", file.__dict__)
         Files.rename(filepath, args['output'], new_name, args['force'], args['action'], args['dry_run'])
     except Exception as e:
-        traceback.print_stack()
         print(e)
 
 
-def do_rollback(old_path, unused_filename ,**args):
+def do_rollback(old_path, unused_filename, **args):
     Files.rollback(old_path)
 
 
 def iter_files(func, **args):
     [func(filepath, filename, **args) for i in args['input'] for filepath, filename in Files.list(i, args['recursive'])]
+    [Files.remove_empty_folders(i) for i in args['input'] if args['clean']]
