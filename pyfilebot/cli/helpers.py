@@ -12,8 +12,6 @@ DEFAULT_RULES = {
 }
 
 
-# iter_files(do_rename, cls=ShowEpisode, cache=Cache(), **args
-
 def do_rename(filepath, filename, **args):
     try:
         file = args['cls'](filename, args['ignore'], args['language'], args['cache'])
