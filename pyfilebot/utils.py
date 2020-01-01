@@ -105,6 +105,7 @@ class Files:
 
     @staticmethod
     def rollback(old_path):
+        print(old_path)
         with open(TEMP_HISTORY_FILE, 'r') as f:
             content = f.readlines()
         content.reverse()

@@ -66,6 +66,7 @@ def rollback(**args):
     iter_files(do_rollback, **args)
 
 
+
 @cli.command(**CONTEXT_SETTINGS)
 def history():
     """History of files renamed"""

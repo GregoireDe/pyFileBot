@@ -16,11 +16,12 @@ class Cache:
     show = {}
 
     def caching(self, file_title, show_title, show_details):
+        self.show.update({file_title: {"details": {}, "title": None}})
         self.show[file_title] = {"details": None, "title": None}
         show_details = {f"{episode['airedSeason']}{episode['airedEpisodeNumber']}": episode['episodeName'] for
                         episode in show_details}
-        self.show[file_title]["details"].update(show_details)
-        self.show[file_title]["title"].update(show_title)
+        self.show[file_title]["details"] = show_details
+        self.show[file_title]["title"] = show_title
 
 
 class File:
@@ -109,7 +110,7 @@ class Movie(File):
         # f2 = helpers.getAKAsInLanguage(f, language)
         self.t = movie_details["title"]
         self.t = re.compile(r'(\([0-9]{4}\))').sub('', self.t).strip() if re.findall(r"([0-9]{4})",
-                                                                                             self.t) else self.t
+                                                                                     self.t) else self.t
         self.x = self.file_infos['container']
         self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
 
@@ -118,10 +119,9 @@ class ShowEpisode(File):
 
     def __init__(self, name, ignore, language, c: Cache = None):
         File.__init__(self, name, ignore)
-        if self.file_title not in c.show_list:
-
+        if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
-            o, shows = self.search_database("tvdb", self.file_title, language)
+            shows = self.search_database("tvdb", self.file_title, language)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
             # Ignore unknown shows
@@ -131,11 +131,10 @@ class ShowEpisode(File):
             show_details = self.get_details("tvdb", self.infos['id'])
             # Caching the show
             c.caching(self.file_title, self.infos['seriesName'], show_details)
-
-        self.s = self.file_infos['season']
+        self.s = str(self.file_infos['season'])
         self.s00 = self.s.rjust(2, '0')
         self.x = self.file_infos['container']
-        self.e = self.file_infos['episode']
+        self.e = str(self.file_infos['episode'])
         self.e00 = self.e.rjust(2, '0')
         try:
             self.n = c.show[self.file_title]["title"]

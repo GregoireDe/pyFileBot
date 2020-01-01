@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
+import traceback
 
 from pyfilebot.utils import Files
 
 CONTEXT_SETTINGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
 
 DEFAULT_RULES = {
-    "movies": "{t} ({y})/{t} ({y}).{x}",
-    "shows": "{t}/Season {s}/{t} - S{s00}E{e00} - {n}.{x}"
+    "movies": "{n} ({y})/{n} ({y}).{x}",
+    "shows": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"
 }
-
+#iter_files(do_rename, cls=ShowEpisode, cache=Cache(), **args
 
 def do_rename(filepath, filename, **args):
     try:
         file = args['cls'](filename, args['ignore'], args['language'], args['cache'])
-        new_name = Files.process_rules(args['rules'],args['cls'].__class__.__name__, file)
+        new_name = Files.process_rules(args['rules'],"ShowEpisode", file.__dict__)
         Files.rename(filepath, args['output'], new_name, args['force'], args['action'], args['dry_run'])
     except Exception as e:
+        traceback.print_stack()
         print(e)
 
 
-def do_rollback(old_path, **args):
+def do_rollback(old_path, unused_filename ,**args):
     Files.rollback(old_path)
 
 
