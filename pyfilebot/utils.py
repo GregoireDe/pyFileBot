@@ -4,6 +4,8 @@ import shutil
 import re
 import tempfile
 
+import glob
+
 import string
 import socket
 
@@ -38,17 +40,24 @@ class Files:
     @staticmethod
     def list(start_path, recur=True):
         extensions = ['avi', 'flv', 'm4v', 'mkv', 'mp4', 'mov', 'mpg', 'mpeg', 'wmv', 'srt']
-        if os.path.isfile(start_path):
-            yield start_path, os.path.basename(start_path)
+        g = glob.glob(start_path)
+        if g and len(g) > 1:
+            for absolute_path in g:
+                ext = absolute_path.split('.')[-1]
+                if ext in extensions:
+                    yield absolute_path, os.path.basename(absolute_path)
         else:
-            for dirpath, dirs, files in os.walk(start_path, topdown=True):
-                for file in files:
-                    absolute_path = os.path.abspath(os.path.join(dirpath, file))
-                    ext = absolute_path.split('.')[-1]
-                    if ext in extensions:
-                        yield absolute_path, file
-                if not recur:
-                    break
+            if os.path.isfile(start_path):
+                yield start_path, os.path.basename(start_path)
+            else:
+                for dirpath, dirs, files in os.walk(start_path, topdown=True):
+                    for file in files:
+                        absolute_path = os.path.abspath(os.path.join(dirpath, file))
+                        ext = absolute_path.split('.')[-1]
+                        if ext in extensions:
+                            yield absolute_path, file
+                    if not recur:
+                        break
 
     @staticmethod
     def process_rules(name, type, details):

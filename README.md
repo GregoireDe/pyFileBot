@@ -19,7 +19,7 @@ The tool is not based on  FileBot, but since it wasn't free and over featured fo
 ## Features
 
 - Manage **Movies** and **TV Shows**
-- Handle **multiple** directories or files at once
+- Handle **multiple** directories or files at once, even path with **wildcards**
 - **Custom** output file format
 - Choose between **copy, move or symlinks**
 - Manage user input or pass on **unknown** files
