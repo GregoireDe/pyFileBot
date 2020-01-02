@@ -35,11 +35,10 @@ class File:
 
     def __init__(self, name, ignore):
         self.file_infos = guessit(name)
-        print(self.file_infos)
         self.file_title = self.file_infos["title"]
         self.ignore = ignore
 
-    def search_database(self,  file_title, language):
+    def search_database(self, file_title, language):
         """Select into IMDb or TheTVDB the medias based on his title
 
         Args:
@@ -75,9 +74,6 @@ class File:
         Returns:
             dict: All infos regarding the media chosen
         """
-        if not all_results:
-            raise Exception("Show/Movie not found")
-
         if len(all_results) == 1:
             return all_results[0]
 
@@ -95,16 +91,24 @@ class File:
             return all_results[int(n)]
         return None
 
-    def get_details(self,  id):
+    def get_details(self, id):
         if self.__class__.__name__ == "Movie":
             return self.imdb.get_movie(id)
         else:
             return tvdb.Series(id).Episodes.all()
 
+    def error_or_ignore(self, data):
+        if not data:
+            if self.ignore:
+                print(f"{self.__class__.__name__} not found and ignored '{self.file_title}'")
+            else:
+                raise Exception(f"{self.__class__.__name__} not found: {self.file_title}")
+
 
 class Movie(File):
     """Movie object
     """
+
     def __init__(self, name, ignore, language, c=None):
         File.__init__(self, name, ignore)
 
@@ -113,14 +117,11 @@ class Movie(File):
 
         # Search IDMB database with file name
         movies = self.search_database(self.file_title, language)
+        self.error_or_ignore(movies)
         # Find the best match
-        self.infos = self.find_infos(movies, "title")
 
-        if not self.infos:
-            if ignore:
-                return
-            else:
-                raise Exception(f"Movie not found: {name}")
+        self.infos = self.find_infos(movies, "title")
+        self.error_or_ignore(self.infos)
         # Get movie details
         movie_details = self.get_details(self.infos["movieID"])
 
@@ -135,21 +136,19 @@ class Movie(File):
 class ShowEpisode(File):
     """Show episode object
     """
+
     def __init__(self, name, ignore, language, c: Cache = None):
         File.__init__(self, name, ignore)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
             shows = self.search_database(self.file_title, language)
+            self.error_or_ignore(shows)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
-            # Ignore unknown shows
-            if not self.infos:
-                if ignore:
-                    return
-                else:
-                    raise Exception(f"Episode not found: {name}")
+            self.error_or_ignore(self.infos)
+
             # Get show details
-            show_details = self.get_details( self.infos['id'])
+            show_details = self.get_details(self.infos['id'])
             # Caching the show
             c.caching(self.file_title, self.infos['seriesName'], show_details)
         self.s = str(self.file_infos['season'])
@@ -170,4 +169,4 @@ class ShowEpisode(File):
             self.n = c.show[self.file_title]["title"].strip()
             self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{find_e}"].strip()
         except Exception:
-            raise Exception(f"Episode not found: {name}")
+            raise Exception(f"Episode mismatch: {name}")
