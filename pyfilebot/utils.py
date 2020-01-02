@@ -14,8 +14,8 @@ seed(socket.gethostname())
 TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.ascii_letters) for n in range(12)]))
 
 SPECIAL_RULES = {
-    "plex": {"Movie": "{t} ({y})/{t} ({y}).{x}",
-             "ShowEpisode": "{t}/Season {s}/{t} - S{s00}E{e00} - {n}.{x}"}
+    "plex": {"Movie": "{n} ({y})/{n} ({y}).{x}",
+             "ShowEpisode": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"}
 }
 
 
