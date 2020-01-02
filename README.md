@@ -87,10 +87,10 @@ You can easily define your own episode and movie naming schemes. It uses Python 
 
 | Bind  | Description  |
 |-------|------------------|
-| **t** | Movie / Show name |   
+| **n** | Movie / Show name |   
 | **y** | Year air date |  
 | **x** | File extension  |   
-| **n** | Episode name |   
+| **t** | Episode name |   
 | **s** | Season  |   
 | **s00** | Season (2 digits format)  |   
 | **e** | Episode  |   
