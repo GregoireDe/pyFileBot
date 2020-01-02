@@ -69,7 +69,7 @@ Options:
   -o, --output TEXT             The directory to move renamed files to, if not
                                 specified the input working directory is used
   -u, --rules TEXT              Format to apply for renaming  [default:
-                                {n}/Season {s}/{n} - S{s00}E{e00} - {t}.{ext}]
+                                {t}/Season {s}/{t} - S{s00}E{e00} - {n}.{ext}]
   -a, --action [move|copy|sym]  Use move, copy or symlink files to the
                                 destination  [default: move]
   -i, --ignore                  Ignore shows not found, best choice for non-
@@ -87,10 +87,10 @@ You can easily define your own episode and movie naming schemes. It uses Python 
 
 | Bind  | Description  |
 |-------|------------------|
-| **n** | Movie / Show name |   
+| **t** | Movie / Show name |   
 | **y** | Year air date |  
 | **x** | File extension  |   
-| **t** | Episode name |   
+| **n** | Episode name |   
 | **s** | Season  |   
 | **s00** | Season (2 digits format)  |   
 | **e** | Episode  |   
@@ -98,7 +98,7 @@ You can easily define your own episode and movie naming schemes. It uses Python 
 
 
 ```text
-$ pyfilebot shows --rules "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}" ...
+$ pyfilebot shows --rules "{t}/Season {s}/{t} - S{s00}E{e00} - {n}.{x}" ...
 Watchmen/Season 1/Watchmen - S01E01 - It's Summer and We're Running Out of Ice.mkv
 ```
 
