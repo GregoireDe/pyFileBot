@@ -35,11 +35,25 @@ class File:
 
     def __init__(self, name, ignore):
         self.file_infos = guessit(name)
+        print(self.file_infos)
         self.file_title = self.file_infos["title"]
         self.ignore = ignore
 
-    def search_database(self, database_name, file_title, language):
-        if database_name == "imdb":
+    def search_database(self,  file_title, language):
+        """Select into IMDb or TheTVDB the medias based on his title
+
+        Args:
+            media_type (str): Movie or ShowEpisode
+            file_title (str): Media title
+            language (str): Language for the search
+
+        Raises:
+            Exception: Generic exception
+
+        Returns:
+            dict: All the medias found
+        """
+        if self.__class__.__name__ == "Movie":
             self.imdb = IMDb()
             r = self.imdb.search_movie(file_title)
             return r
@@ -49,10 +63,10 @@ class File:
             return r
 
     def find_infos(self, all_results, title, max_depth=3):
-        """Select into IMDb or TheTVDB a media based on his title
+        """Select into IMDb or TheTVDB only one media
 
         Args:
-            all_results (str): All results coming from IMDb or The TDVD
+            all_results (dict): All results coming from IMDb or The TDVD
             title (str): Media title
 
         Raises:
@@ -81,15 +95,16 @@ class File:
             return all_results[int(n)]
         return None
 
-    def get_details(self, database_name, id):
-        if database_name == "imdb":
+    def get_details(self,  id):
+        if self.__class__.__name__ == "Movie":
             return self.imdb.get_movie(id)
         else:
             return tvdb.Series(id).Episodes.all()
 
 
 class Movie(File):
-
+    """Movie object
+    """
     def __init__(self, name, ignore, language, c=None):
         File.__init__(self, name, ignore)
 
@@ -97,15 +112,17 @@ class Movie(File):
             self.file_title = f"{self.file_title} ({self.file_infos['year']})"
 
         # Search IDMB database with file name
-        movies = self.search_database("imdb", self.file_title, language)
+        movies = self.search_database(self.file_title, language)
         # Find the best match
         self.infos = self.find_infos(movies, "title")
 
-        if not self.infos and ignore:
-            return
-
+        if not self.infos:
+            if ignore:
+                return
+            else:
+                raise Exception(f"Movie not found: {name}")
         # Get movie details
-        movie_details = self.get_details("imdb", self.infos.movieID)
+        movie_details = self.get_details(self.infos["movieID"])
 
         # f2 = helpers.getAKAsInLanguage(f, language)
         self.t = movie_details["title"]
@@ -116,28 +133,41 @@ class Movie(File):
 
 
 class ShowEpisode(File):
-
+    """Show episode object
+    """
     def __init__(self, name, ignore, language, c: Cache = None):
         File.__init__(self, name, ignore)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
-            shows = self.search_database("tvdb", self.file_title, language)
+            shows = self.search_database(self.file_title, language)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
             # Ignore unknown shows
-            if not self.infos and ignore:
-                return
+            if not self.infos:
+                if ignore:
+                    return
+                else:
+                    raise Exception(f"Episode not found: {name}")
             # Get show details
-            show_details = self.get_details("tvdb", self.infos['id'])
+            show_details = self.get_details( self.infos['id'])
             # Caching the show
             c.caching(self.file_title, self.infos['seriesName'], show_details)
         self.s = str(self.file_infos['season'])
         self.s00 = self.s.rjust(2, '0')
         self.x = self.file_infos['container']
-        self.e = str(self.file_infos['episode'])
-        self.e00 = self.e.rjust(2, '0')
+
+        # Handle multiple episode
+        if isinstance(self.file_infos['episode'], list):
+            self.e = '-'.join(str(e) for e in self.file_infos['episode'])
+            self.e00 = '-'.join(str(e).rjust(2, '0') for e in self.file_infos['episode'])
+            find_e = self.file_infos['episode'][0]
+        else:
+            self.e = str(self.file_infos['episode'])
+            self.e00 = self.e.rjust(2, '0')
+            find_e = self.e
+
         try:
             self.n = c.show[self.file_title]["title"].strip()
-            self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{self.file_infos['episode']}"].strip()
+            self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{find_e}"].strip()
         except Exception:
             raise Exception(f"Episode not found: {name}")
