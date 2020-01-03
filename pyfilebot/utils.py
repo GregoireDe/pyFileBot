@@ -25,6 +25,9 @@ class Files:
 
     @staticmethod
     def remove_empty_folders(path, remove_root=True):
+        g = glob.glob(path)
+        if g:
+            path = os.path.dirname(path[0])
         if not os.path.isdir(path):
             return
         files = os.listdir(path)
@@ -39,9 +42,9 @@ class Files:
 
     @staticmethod
     def list(start_path, recur=True):
-        extensions = ['avi', 'flv', 'm4v', 'mkv', 'mp4', 'mov', 'mpg', 'mpeg', 'wmv', 'srt']
+        extensions = ['avi', 'flv', 'm4v', 'mkv', 'mp4', 'mov', 'mpg', 'mpeg', 'wmv', 'srt', 'nfo']
         g = glob.glob(start_path)
-        if g and len(g) > 1:
+        if g and (len(g) > 1 or os.path.isfile(g[0])):
             for absolute_path in g:
                 ext = absolute_path.split('.')[-1]
                 if ext in extensions:

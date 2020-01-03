@@ -1,8 +1,9 @@
-from imdb import IMDb, helpers
+from imdb import IMDb, helpers, linguistics
 import re
 import tvdbsimple as tvdb
 from guessit import guessit
 from Levenshtein import distance
+import pycountry
 
 tvdb.KEYS.API_KEY = '3ac0c4741aaf457d899b38da6ced68aa'
 
@@ -93,7 +94,7 @@ class File:
 
     def get_details(self, id):
         if self.__class__.__name__ == "Movie":
-            return self.imdb.get_movie(id)
+            return self.imdb.get_movie(id, ['main', 'akas'])
         else:
             return tvdb.Series(id).Episodes.all()
 
@@ -120,17 +121,33 @@ class Movie(File):
         self.error_or_ignore(movies)
         # Find the best match
 
-        self.infos = self.find_infos(movies, "title")
+        self.infos = self.find_infos(movies, "title").__dict__
         self.error_or_ignore(self.infos)
         # Get movie details
         movie_details = self.get_details(self.infos["movieID"])
 
-        # f2 = helpers.getAKAsInLanguage(f, language)
-        self.t = movie_details["title"]
-        self.t = re.compile(r'(\([0-9]{4}\))').sub('', self.t).strip() if re.findall(r"([0-9]{4})",
-                                                                                     self.t) else self.t
+        self.n = self._get_language_title(movie_details, language)
+
+        self.n = re.compile(r"(\([0-9]{4}\))").sub('', self.n).strip() if re.findall(r"([0-9]{4})",
+                                                                                    self.n) else self.n
         self.x = self.file_infos['container']
         self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
+
+    @staticmethod
+    def _get_language_title(movie, language):
+        language = language.lower()
+        f2 = helpers.akasLanguages(movie)
+        title = {}
+        for f in f2:
+            f_l = re.findall(r'\w+$|\w+(?=\s\()', f[1])
+            if f_l:
+                l = linguistics.COUNTRY_LANG.get(f_l[0])
+                pylang_name = pycountry.languages.get(name=l)
+                if pylang_name:
+                    title.update({pylang_name.alpha_2: re.findall(r'.*(?=\s\w+\s\()|.*(?=\s\w+)', f[1])[0]})
+        if language in title.keys():
+            return title[language]
+        return movie["title"]
 
 
 class ShowEpisode(File):
