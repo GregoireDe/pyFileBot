@@ -1,4 +1,4 @@
-from imdb import IMDb, helpers, linguistics
+from imdb import IMDb, helpers, linguistics, Movie as imdbMovie
 import re
 import tvdbsimple as tvdb
 from guessit import guessit
@@ -16,7 +16,7 @@ class Cache:
     """
     show = {}
 
-    def caching(self, file_title, show_title, show_details):
+    def caching(self, file_title: str, show_title: str, show_details: dict):
         self.show.update({file_title: {"details": {}, "title": None}})
         self.show[file_title] = {"details": None, "title": None}
         show_details = {f"{episode['airedSeason']}{episode['airedEpisodeNumber']}": episode['episodeName'] for
@@ -34,12 +34,12 @@ class File:
     """
     imdb = None
 
-    def __init__(self, name, ignore):
+    def __init__(self, name: str, ignore: bool):
         self.file_infos = guessit(name)
         self.file_title = self.file_infos["title"]
         self.ignore = ignore
 
-    def search_database(self, file_title, language):
+    def search_database(self, file_title: str, language: str):
         """Select into IMDb or TheTVDB the medias based on his title
 
         Args:
@@ -62,12 +62,13 @@ class File:
             r = o.series(file_title, language=language)
             return r
 
-    def find_infos(self, all_results, title, max_depth=3):
+    def find_infos(self, medias: dict, title: str, max_depth: int = 3):
         """Select into IMDb or TheTVDB only one media
 
         Args:
-            all_results (dict): All results coming from IMDb or The TDVD
+            medias (dict): All results coming from IMDb or The TDVD
             title (str): Media title
+            max_depth (int): Maximum depth to lookup for strict match / Levenstein distance
 
         Raises:
             Exception: Generic exception
@@ -75,24 +76,32 @@ class File:
         Returns:
             dict: All infos regarding the media chosen
         """
-        if len(all_results) == 1:
-            return all_results[0]
+        if len(medias) == 1:
+            return medias[0]
 
-        for k, v in list(enumerate(all_results))[:max_depth]:
-            if self.file_title.lower() == all_results[k][title].lower():
-                return all_results[k]
-            elif distance(self.file_title, all_results[k][title]) < 1:
-                return all_results[k]
+        for k, v in list(enumerate(medias))[:max_depth]:
+            if self.file_title.lower() == medias[k][title].lower():
+                return medias[k]
+            elif distance(self.file_title, medias[k][title]) < 1:
+                return medias[k]
 
         if not self.ignore:
             print(f"Multiple name found for '{self.file_title}'")
-            for k, v in enumerate(all_results):
+            for k, v in enumerate(medias):
                 print(f"{k}: {v[title]}")
             n = input("Enter the right one: ")
-            return all_results[int(n)]
+            return medias[int(n)]
         return None
 
-    def get_details(self, id):
+    def get_details(self, id: str):
+        """Get all details from IMDb or TheTVDB media ID
+
+       Args:
+           id (str): A media ID
+
+       Returns:
+           dict: All infos regarding the media
+       """
         if self.__class__.__name__ == "Movie":
             return self.imdb.get_movie(id, ['main', 'akas'])
         else:
@@ -110,7 +119,7 @@ class Movie(File):
     """Movie object
     """
 
-    def __init__(self, name, ignore, language, c=None):
+    def __init__(self, name: str, ignore: bool, language: str, c=None):
         File.__init__(self, name, ignore)
 
         if "year" in self.file_title:
@@ -128,13 +137,21 @@ class Movie(File):
 
         self.n = self._get_language_title(movie_details, language)
 
-        self.n = re.compile(r"(\([0-9]{4}\))").sub('', self.n).strip() if re.findall(r"([0-9]{4})",
-                                                                                    self.n) else self.n
+        self.n = re.compile(r"(\([0-9]{4}\))").sub('', self.n).strip() if re.findall(r"([0-9]{4})", self.n) else self.n
         self.x = self.file_infos['container']
         self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
 
     @staticmethod
-    def _get_language_title(movie, language):
+    def _get_language_title(movie: imdbMovie, language: str):
+        """Get language title for a movie (IMDBpy getAKAsInLanguage() is not working at all)
+
+        Args:
+            movie (object): Movie object
+            language (str): Language wanted
+
+        Returns:
+            str: Movie title
+        """
         language = language.lower()
         f2 = helpers.akasLanguages(movie)
         title = {}
@@ -147,14 +164,14 @@ class Movie(File):
                     title.update({pylang_name.alpha_2: re.findall(r'.*(?=\s\w+\s\()|.*(?=\s\w+)', f[1])[0]})
         if language in title.keys():
             return title[language]
-        return movie["title"]
+        return movie
 
 
 class ShowEpisode(File):
     """Show episode object
     """
 
-    def __init__(self, name, ignore, language, c: Cache = None):
+    def __init__(self, name: str, ignore: bool, language: str, c: Cache = None):
         File.__init__(self, name, ignore)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
