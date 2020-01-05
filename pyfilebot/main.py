@@ -87,8 +87,8 @@ class File:
 
         if not self.ignore:
             print(f"Multiple name found for '{self.file_title}'")
-            # No need for more than 10 medias
-            medias = medias[:10]
+            # No need for more than 6 medias match
+            medias = medias[:6]
             for k, v in enumerate(medias):
                 print(f"{k}: {v[title]}")
             n = input("Enter the right one: ")
