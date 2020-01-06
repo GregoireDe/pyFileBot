@@ -28,7 +28,8 @@ The tool is not based on  FileBot, but since it wasn't free and over featured fo
 ###### TODO
 
 - Use logger
-- 
+- Add more complex rules
+- Add subtitles feature
 
 
 ## Installation
