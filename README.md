@@ -34,6 +34,7 @@ The tool is not based on  FileBot, but since it wasn't free and over featured fo
 
 ## Installation
 
+*Python 3.6+ is required*
 ```text
 $ pip install pyfilebot
 ```
