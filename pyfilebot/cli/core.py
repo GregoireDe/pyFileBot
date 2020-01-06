@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files, DEFAULT_RULES, CONTEXT_SETTINGS
+from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files, CONTEXT_SETTINGS
 
-from pyfilebot.utils import Files
+from pyfilebot.utils import Files, DEFAULT_RULES
 from pyfilebot.main import Cache, Movie, ShowEpisode
 
 import click
@@ -19,13 +19,17 @@ class cption:
 
     @staticmethod
     def renamer(func):
-        func = click.option('-l', '--language', help=f'Output language file for {func.__name__}', default="en",  show_default=True)(func)
+        func = click.option('-l', '--language', help=f'Output language file for {func.__name__}', default="en",
+                            show_default=True)(func)
         func = click.option('-d', '--dry-run', is_flag=True, help='Dry run your renaming', default=False)(func)
         func = click.option('-f', '--force', is_flag=True,
-                            help='Force renaming if an output file already exists, ignore otherwise', default=False)(func)
-        func = click.option('-i', '--ignore', is_flag=True, help=f'Ignore {func.__name__} not found, best choice for non-interactive mode',
+                            help='Force renaming if an output file already exists, ignore otherwise', default=False)(
+            func)
+        func = click.option('-i', '--ignore', is_flag=True,
+                            help=f'Ignore {func.__name__} not found, best choice for non-interactive mode',
                             default=False)(func)
-        func = click.option('-a', '--action', type=click.Choice(['move','copy', 'sym']), default="move", show_default=True,
+        func = click.option('-a', '--action', type=click.Choice(['move', 'copy', 'sym']), default="move",
+                            show_default=True,
                             help="Move, copy or symlink files to the destination")(func)
         func = click.option('-u', '--rules', help='Format to apply for renaming',
                             default=DEFAULT_RULES[func.__name__], show_default=True)(func)
@@ -64,7 +68,6 @@ def shows(**args):
 def rollback(**args):
     """Rollback INPUT files or folders based on the history"""
     iter_files(do_rollback, **args)
-
 
 
 @cli.command(**CONTEXT_SETTINGS)

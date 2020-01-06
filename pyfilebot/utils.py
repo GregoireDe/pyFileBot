@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 import shutil
 import re
@@ -19,6 +20,10 @@ TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.a
 SPECIAL_RULES = {
     "plex": {"Movie": "{n} ({y})/{n} ({y}).{x}",
              "ShowEpisode": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"}
+}
+DEFAULT_RULES = {
+    "movies": "{n} ({y})/{n} ({y}).{x}",
+    "shows": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"
 }
 
 

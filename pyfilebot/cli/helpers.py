@@ -6,13 +6,8 @@ from pyfilebot.utils import Files
 
 CONTEXT_SETTINGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
 
-DEFAULT_RULES = {
-    "movies": "{n} ({y})/{n} ({y}).{x}",
-    "shows": "{n}/Season {s}/{n} - S{s00}E{e00} - {t}.{x}"
-}
 
-
-def do_rename(file_path: str,  **kw: any):
+def do_rename(file_path: str, **kw: any):
     """Perform a  renaming on a file media
 
    Args:
