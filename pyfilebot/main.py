@@ -1,9 +1,12 @@
-from imdb import IMDb, helpers, linguistics, Movie as imdbMovie
 import re
+import os
+
 import tvdbsimple as tvdb
+import pycountry
+from imdb import IMDb, helpers, linguistics, Movie as imdbMovie
 from guessit import guessit
 from Levenshtein import distance
-import pycountry
+
 
 tvdb.KEYS.API_KEY = '3ac0c4741aaf457d899b38da6ced68aa'
 
@@ -34,8 +37,9 @@ class File:
     """
     imdb = None
 
-    def __init__(self, name: str, ignore: bool):
-        self.file_infos = guessit(name)
+    def __init__(self, file_path: str, ignore: bool):
+        self.name = os.path.basename(file_path)
+        self.file_infos = guessit(self.name )
         self.file_title = self.file_infos["title"]
         if "year" in self.file_infos:
             self.file_title = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
@@ -123,8 +127,8 @@ class Movie(File):
     """Movie object
     """
 
-    def __init__(self, name: str, ignore: bool, language: str, c=None):
-        File.__init__(self, name, ignore)
+    def __init__(self, file_path: str, ignore: bool, language: str, c=None):
+        File.__init__(self, file_path, ignore)
 
         # Search IDMB database with file name
         movies = self.search_database(self.file_title, language)
@@ -172,8 +176,8 @@ class ShowEpisode(File):
     """Show episode object
     """
 
-    def __init__(self, name: str, ignore: bool, language: str, c: Cache = None):
-        File.__init__(self, name, ignore)
+    def __init__(self, file_path: str, ignore: bool, language: str, c: Cache = None):
+        File.__init__(self, file_path, ignore)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
             shows = self.search_database(self.file_title, language)

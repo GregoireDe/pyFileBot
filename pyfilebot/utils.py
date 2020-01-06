@@ -11,6 +11,7 @@ import socket
 
 from random import choice, seed
 from datetime import datetime
+from typing import Iterable
 
 seed(socket.gethostname())
 TEMP_HISTORY_FILE = os.path.join(tempfile.gettempdir(), ''.join([choice(string.ascii_letters) for n in range(12)]))
@@ -24,7 +25,7 @@ SPECIAL_RULES = {
 class Files:
 
     @staticmethod
-    def remove_empty_folders(path, remove_root=True):
+    def remove_empty_folders(path: str, remove_root: bool = True):
         g = glob.glob(path)
         if g:
             path = os.path.dirname(path[0])
@@ -41,29 +42,29 @@ class Files:
             os.rmdir(path)
 
     @staticmethod
-    def list(start_path, recur=True):
+    def list(start_path: str, recur: bool = True) -> Iterable:
         extensions = ['avi', 'flv', 'm4v', 'mkv', 'mp4', 'mov', 'mpg', 'mpeg', 'wmv', 'srt', 'nfo']
         g = glob.glob(start_path)
         if g and (len(g) > 1 or os.path.isfile(g[0])):
-            for absolute_path in g:
-                ext = absolute_path.split('.')[-1]
+            for file_path in g:
+                ext = file_path.split('.')[-1]
                 if ext in extensions:
-                    yield absolute_path, os.path.basename(absolute_path)
+                    yield file_path
         else:
             if os.path.isfile(start_path):
-                yield start_path, os.path.basename(start_path)
+                yield start_path
             else:
                 for dirpath, dirs, files in os.walk(start_path, topdown=True):
                     for file in files:
-                        absolute_path = os.path.abspath(os.path.join(dirpath, file))
-                        ext = absolute_path.split('.')[-1]
+                        file_path = os.path.abspath(os.path.join(dirpath, file))
+                        ext = file_path.split('.')[-1]
                         if ext in extensions:
-                            yield absolute_path, file
+                            yield file_path
                     if not recur:
                         break
 
     @staticmethod
-    def process_rules(name, type, details):
+    def process_rules(name: str, type: str, details: dict) -> str:
         try:
             for r in SPECIAL_RULES.keys():
                 if r == name:
@@ -74,7 +75,7 @@ class Files:
             raise Exception(e)
 
     @staticmethod
-    def rename(source_filepath, output_dir, dest_filename, force, action, dry_run):
+    def rename(source_filepath: str, output_dir: str, dest_filename: str, force: bool, action: str, dry_run: bool):
         try:
             dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
             if output_dir:
@@ -99,7 +100,7 @@ class Files:
             print(f"{e}")
 
     @staticmethod
-    def write_history(content):
+    def write_history(content: str):
         with open(TEMP_HISTORY_FILE, 'a') as f:
             f.write(content)
 
@@ -116,20 +117,20 @@ class Files:
             print(f"No history")
 
     @staticmethod
-    def rollback(old_path):
-        print(old_path)
+    def rollback(file_path: str):
+        print(file_path)
         with open(TEMP_HISTORY_FILE, 'r') as f:
             content = f.readlines()
         content.reverse()
         for i, line in enumerate(content):
             i_date, i_old_path, i_new_path = line.split(";")
-            if i_new_path.strip() == old_path:
+            if i_new_path.strip() == file_path:
                 os.makedirs(os.path.dirname(i_old_path), exist_ok=True)
-                shutil.move(old_path, i_old_path)
+                shutil.move(file_path, i_old_path)
                 # Removing lines
                 content.remove(line)
                 with open(TEMP_HISTORY_FILE, "w") as f:
                     content.reverse()
                     f.writelines(content)
-                print(f"{old_path}\n> {i_old_path}")
+                print(f"{file_path}\n> {i_old_path}")
                 break
