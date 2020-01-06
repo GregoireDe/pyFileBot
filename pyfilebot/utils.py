@@ -80,27 +80,27 @@ class Files:
             raise Exception(e)
 
     @staticmethod
-    def rename(source_filepath: str, output_dir: str, dest_filename: str, force: bool, action: str, dry_run: bool):
+    def rename(file_path: str, out_dir: str, out_filename: str, force: bool, action: str, dry_run: bool):
         try:
-            dest_filepath = os.path.abspath(os.path.join(os.path.dirname(source_filepath), dest_filename))
-            if output_dir:
-                dest_filepath = os.path.abspath(os.path.join(output_dir, dest_filename))
-            if source_filepath == dest_filepath or (os.path.isfile(dest_filepath) and not force):
-                print(f"File skipped (already exists): {dest_filepath}")
+            out_file_path = os.path.abspath(os.path.join(os.path.dirname(file_path), out_filename))
+            if out_dir:
+                out_file_path = os.path.abspath(os.path.join(out_dir, out_filename))
+            if file_path == out_file_path or (os.path.isfile(out_file_path) and not force):
+                print(f"File skipped (already exists): {out_file_path}")
                 return
-            if os.path.isfile(dest_filepath) and force:
-                os.remove(dest_filepath)
             if not dry_run:
-                os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
+                if os.path.isfile(out_file_path) and force:
+                    os.remove(out_file_path)
+                os.makedirs(os.path.dirname(out_file_path), exist_ok=True)
                 if action == "sym":
-                    os.symlink(source_filepath, dest_filepath)
+                    os.symlink(file_path, out_file_path)
                 elif action == "copy":
-                    shutil.copy2(source_filepath, dest_filepath)
+                    shutil.copy2(file_path, out_file_path)
                 else:
-                    shutil.move(source_filepath, dest_filepath)
+                    shutil.move(file_path, out_file_path)
                 Files.write_history(
-                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{source_filepath};{dest_filepath}\n")
-            print(f"{source_filepath}\n> {dest_filepath}\n")
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{file_path};{out_file_path}\n")
+            print(f"{file_path}\n> {out_file_path}\n")
         except Exception as e:
             print(f"{e}")
 
