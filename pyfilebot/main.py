@@ -37,6 +37,8 @@ class File:
     def __init__(self, name: str, ignore: bool):
         self.file_infos = guessit(name)
         self.file_title = self.file_infos["title"]
+        if "year" in self.file_infos:
+            self.file_title = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
         self.ignore = ignore
 
     def search_database(self, file_title: str, language: str):
@@ -123,9 +125,6 @@ class Movie(File):
 
     def __init__(self, name: str, ignore: bool, language: str, c=None):
         File.__init__(self, name, ignore)
-
-        if "year" in self.file_title:
-            self.file_title = f"{self.file_title} ({self.file_infos['year']})"
 
         # Search IDMB database with file name
         movies = self.search_database(self.file_title, language)
