@@ -123,7 +123,6 @@ class Files:
 
     @staticmethod
     def rollback(file_path: str):
-        print(file_path)
         with open(TEMP_HISTORY_FILE, 'r') as f:
             content = f.readlines()
         content.reverse()
