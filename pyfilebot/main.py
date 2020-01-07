@@ -210,4 +210,4 @@ class ShowEpisode(File):
             self.n = c.show[self.file_title]["title"].strip()
             self.t = c.show[self.file_title]["details"][f"{self.file_infos['season']}{find_e}"].strip()
         except Exception:
-            raise Exception(f"Episode mismatch: {name}")
+            raise Exception(f"Episode mismatch: {file_path}")
