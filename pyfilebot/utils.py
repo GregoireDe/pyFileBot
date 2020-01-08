@@ -34,8 +34,6 @@ class Files:
         g = glob.glob(path)
         if g:
             path = os.path.dirname(path[0])
-        if not os.path.isdir(path):
-            return
         files = os.listdir(path)
         if len(files):
             for f in files:
@@ -71,11 +69,11 @@ class Files:
     @staticmethod
     def process_rules(name: str, type: str, details: dict) -> str:
         try:
+            details.update({k: re.sub(r'[*?:"<>\\/|]', "", v) for k, v in details.items() if k in ["t","n"]})
             for r in SPECIAL_RULES.keys():
                 if r == name:
                     name = SPECIAL_RULES[name][type]
-            name = name.format(**details)
-            return re.sub(r'[*?:"<>|]', "", name)
+            return name.format(**details)
         except KeyError as e:
             raise Exception(e)
 
