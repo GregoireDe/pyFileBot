@@ -69,10 +69,8 @@ class Files:
     @staticmethod
     def process_rules(name: str, type: str, details: dict) -> str:
         try:
+            name = SPECIAL_RULES[name][type] if name in SPECIAL_RULES.keys() else name
             details.update({k: re.sub(r'[*?:"<>\\/|]', "", v) for k, v in details.items() if k in ["t","n"]})
-            for r in SPECIAL_RULES.keys():
-                if r == name:
-                    name = SPECIAL_RULES[name][type]
             return name.format(**details)
         except KeyError as e:
             raise Exception(e)
