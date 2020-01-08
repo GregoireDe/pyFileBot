@@ -8,7 +8,7 @@ from pyfilebot.main import Cache, Movie, ShowEpisode
 import click
 
 
-class cption:
+class Option:
 
     @staticmethod
     def dirs(func):
@@ -25,8 +25,11 @@ class cption:
         func = click.option('-f', '--force', is_flag=True,
                             help='Force renaming if an output file already exists, ignore otherwise', default=False)(
             func)
-        func = click.option('-i', '--ignore', is_flag=True,
-                            help=f'Ignore {func.__name__} not found, best choice for non-interactive mode',
+        func = click.option('-i', '--imdb_id',
+                            help=f'Force IMDb id for a {func.__name__} (Only works if one media / folder as input)')(
+            func)
+        func = click.option('-n', '--non-interactive', is_flag=True,
+                            help=f'Ignore {func.__name__} not found and disable manual association, the option for non-interactive mode',
                             default=False)(func)
         func = click.option('-a', '--action', type=click.Choice(['move', 'copy', 'sym']), default="move",
                             show_default=True,
@@ -45,8 +48,8 @@ def cli():
 
 
 @cli.command(**CONTEXT_SETTINGS)
-@cption.dirs
-@cption.renamer
+@Option.dirs
+@Option.renamer
 @click.argument('input', nargs=-1, required=True)
 def movies(**args):
     """Rename movies from INPUT files or folders"""
@@ -54,8 +57,8 @@ def movies(**args):
 
 
 @cli.command(**CONTEXT_SETTINGS)
-@cption.dirs
-@cption.renamer
+@Option.dirs
+@Option.renamer
 @click.argument('input', nargs=-1, required=True)
 def shows(**args):
     """Rename TV shows from INPUT files or folders"""
@@ -63,7 +66,7 @@ def shows(**args):
 
 
 @cli.command(**CONTEXT_SETTINGS)
-@cption.dirs
+@Option.dirs
 @click.argument('input', nargs=-1, required=True)
 def rollback(**args):
     """Rollback INPUT files or folders based on the history"""
@@ -74,3 +77,9 @@ def rollback(**args):
 def history():
     """History of files renamed"""
     Files.read_history()
+
+
+@cli.command(**CONTEXT_SETTINGS)
+def subtitles():
+    """Download subtitles on medias from INPUT files or folders"""
+    pass

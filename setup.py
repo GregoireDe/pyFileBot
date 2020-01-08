@@ -12,7 +12,7 @@ requires = [
 setup(
     name=pyfilebot.__title__,
     version=pyfilebot.__version__,
-    description='Rename tv show and moviefiles',
+    description='Media file renamer using TheTVDB and IMDb databases.',
     #long_description=long_desc(),
     author=pyfilebot.__author__,
     author_email='pyfilebot@havi.fr',
