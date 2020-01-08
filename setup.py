@@ -7,6 +7,8 @@ requires = [
     'tvdbsimple',
     'guessit',
     'imdbpy',
+    'python-Levenshtein-wheels',
+    'pycountry'
 ]
 
 setup(
