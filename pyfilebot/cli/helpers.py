@@ -15,14 +15,11 @@ def do_rename(file_path: str, **kw: any):
        kw (**any): Parameters and functions to use
    """
     try:
-        file = kw['cls'](file_path, kw['ignore'], kw['language'], kw['cache'])
-        print("1")
+        file = kw['cls'](file_path, kw['non_interactive'], kw['language'], kw['cache'])
         new_name = Files.process_rules(kw['rules'], kw['cls'].__name__, file.__dict__)
-        print("2")
         Files.rename(file_path, kw['output'], new_name, kw['force'], kw['action'], kw['dry_run'])
-    except Exception as e:
-        print("3")
-        print(e)
+    except:
+        print(f"Issue while trying to rename: {file_path}")
 
 
 def do_rollback(file_path: str, **kw: any):

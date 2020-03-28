@@ -40,13 +40,13 @@ class File:
     """
     imdb = None
 
-    def __init__(self, file_path: str, ignore: bool):
+    def __init__(self, file_path: str, non_interactive: bool):
         self.name = os.path.basename(file_path)
         self.file_infos = guessit(self.name )
         self.file_title = self.file_infos["title"]
         if "year" in self.file_infos:
             self.file_title = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
-        self.ignore = ignore
+        self.ignore = non_interactive
 
     def search_database(self, file_title: str, language: str):
         """Select into IMDb or TheTVDB the medias based on his title
@@ -130,14 +130,12 @@ class Movie(File):
     """Movie object
     """
 
-    def __init__(self, file_path: str, ignore: bool, language: str, c=None):
-        File.__init__(self, file_path, ignore)
-
+    def __init__(self, file_path: str, non_interactive: bool, language: str, c=None):
+        File.__init__(self, file_path, non_interactive)
         # Search IDMB database with file name
         movies = self.search_database(self.file_title, language)
         self.error_or_ignore(movies)
         # Find the best match
-
         self.infos = self.find_infos(movies, "title").__dict__
         self.error_or_ignore(self.infos)
         # Get movie details
@@ -179,8 +177,8 @@ class ShowEpisode(File):
     """Show episode object
     """
 
-    def __init__(self, file_path: str, ignore: bool, language: str, c: Cache = None):
-        File.__init__(self, file_path, ignore)
+    def __init__(self, file_path: str, non_interactive: bool, language: str, c: Cache = None):
+        File.__init__(self, file_path, non_interactive)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
             shows = self.search_database(self.file_title, language)

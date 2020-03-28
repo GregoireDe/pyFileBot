@@ -31,9 +31,12 @@ class Files:
 
     @staticmethod
     def remove_empty_folders(path: str, remove_root: bool = True):
-        g = glob.glob(path)
-        if g:
-            path = os.path.dirname(path[0])
+        if not os.path.isdir(path):
+            g = glob.glob(path)
+            if g:
+                path = os.path.dirname(g[0])
+            else:
+                return
         files = os.listdir(path)
         if len(files):
             for f in files:
