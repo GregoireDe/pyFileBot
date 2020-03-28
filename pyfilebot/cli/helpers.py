@@ -16,9 +16,12 @@ def do_rename(file_path: str, **kw: any):
    """
     try:
         file = kw['cls'](file_path, kw['ignore'], kw['language'], kw['cache'])
+        print("1")
         new_name = Files.process_rules(kw['rules'], kw['cls'].__name__, file.__dict__)
+        print("2")
         Files.rename(file_path, kw['output'], new_name, kw['force'], kw['action'], kw['dry_run'])
     except Exception as e:
+        print("3")
         print(e)
 
 

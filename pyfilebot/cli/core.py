@@ -4,6 +4,7 @@ from pyfilebot.cli.helpers import do_rename, do_rollback, iter_files, CONTEXT_SE
 
 from pyfilebot.utils import Files, DEFAULT_RULES
 from pyfilebot.main import Cache, Movie, ShowEpisode
+from pyfilebot import __version__ as version
 
 import click
 
@@ -83,3 +84,9 @@ def history():
 def subtitles():
     """Download subtitles on medias from INPUT files or folders"""
     pass
+
+
+@cli.command(**CONTEXT_SETTINGS)
+def version():
+    """Show version of pyfilebot"""
+    print(version)

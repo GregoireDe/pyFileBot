@@ -5,6 +5,7 @@ import os
 
 import tvdbsimple as tvdb
 import pycountry
+
 from imdb import IMDb, helpers, linguistics, Movie as imdbMovie
 from guessit import guessit
 from Levenshtein import distance
