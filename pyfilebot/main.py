@@ -10,7 +10,6 @@ from imdb import IMDb, helpers, linguistics, Movie as imdbMovie
 from guessit import guessit
 from Levenshtein import distance
 
-
 tvdb.KEYS.API_KEY = '3ac0c4741aaf457d899b38da6ced68aa'
 
 
@@ -39,13 +38,15 @@ class File:
 
     """
     imdb = None
-
+    file_title_movie = None
+    file_title_show = None
     def __init__(self, file_path: str, non_interactive: bool):
         self.name = os.path.basename(file_path)
-        self.file_infos = guessit(self.name )
+        self.file_infos = guessit(self.name)
         self.file_title = self.file_infos["title"]
         if "year" in self.file_infos:
-            self.file_title = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
+            self.file_title_show = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
+            self.file_title_movie = f'{self.file_infos["title"]} y:{self.file_infos["year"]}'
         self.ignore = non_interactive
 
     def search_database(self, file_title: str, language: str):
@@ -90,9 +91,9 @@ class File:
 
         for k, v in list(enumerate(medias))[:max_depth]:
             if self.file_title.lower() == medias[k][title].lower():
-                return medias[k]
+                return medias[k].__dict__
             elif distance(self.file_title, medias[k][title]) < 1:
-                return medias[k]
+                return medias[k].__dict__
 
         if not self.ignore:
             print(f"Multiple name found for '{self.file_title}'")
@@ -101,7 +102,7 @@ class File:
             for k, v in enumerate(medias):
                 print(f"{k}: {v[title]}")
             n = input("Enter the right one: ")
-            return medias[int(n)]
+            return medias[int(n)].__dict__
         return None
 
     def get_details(self, id: str):
@@ -118,12 +119,9 @@ class File:
         else:
             return tvdb.Series(id).Episodes.all()
 
-    def error_or_ignore(self, data):
+    def error(self, data):
         if not data:
-            if self.ignore:
-                print(f"{self.__class__.__name__} not found and ignored '{self.file_title}'")
-            else:
-                raise Exception(f"{self.__class__.__name__} not found: {self.file_title}")
+            raise Exception(f"{self.__class__.__name__} not found: {self.file_title}")
 
 
 class Movie(File):
@@ -133,11 +131,11 @@ class Movie(File):
     def __init__(self, file_path: str, non_interactive: bool, language: str, c=None):
         File.__init__(self, file_path, non_interactive)
         # Search IDMB database with file name
-        movies = self.search_database(self.file_title, language)
-        self.error_or_ignore(movies)
+        movies = self.search_database(self.file_title_movie or self.file_title, language)
+        self.error(movies)
         # Find the best match
-        self.infos = self.find_infos(movies, "title").__dict__
-        self.error_or_ignore(self.infos)
+        self.infos = self.find_infos(movies, "title")
+        self.error(self.infos)
         # Get movie details
         movie_details = self.get_details(self.infos["movieID"])
 
@@ -181,11 +179,11 @@ class ShowEpisode(File):
         File.__init__(self, file_path, non_interactive)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
-            shows = self.search_database(self.file_title, language)
-            self.error_or_ignore(shows)
+            shows = self.search_database(self.file_title_show or self.file_title, language)
+            self.error(shows)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
-            self.error_or_ignore(self.infos)
+            self.error(self.infos)
 
             # Get show details
             show_details = self.get_details(self.infos['id'])

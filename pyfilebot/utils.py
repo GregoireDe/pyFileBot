@@ -73,13 +73,13 @@ class Files:
     def process_rules(name: str, type: str, details: dict) -> str:
         try:
             name = SPECIAL_RULES[name][type] if name in SPECIAL_RULES.keys() else name
-            details.update({k: re.sub(r'[*?:"<>\\/|]', "", v) for k, v in details.items() if k in ["t","n"]})
+            details.update({k: re.sub(r'[*?:"<>\\/|]', "", v) for k, v in details.items() if k in ["t", "n"]})
             return name.format(**details)
         except KeyError as e:
             raise Exception(e)
 
     @staticmethod
-    def rename(file_path: str, out_dir: str, out_filename: str, force: bool, action: str, dry_run: bool):
+    def rename(file_path: str, out_dir: str, out_filename: str, force: bool, action: str, dry_run: bool, clean: bool):
         try:
             out_file_path = os.path.abspath(os.path.join(os.path.dirname(file_path), out_filename))
             if out_dir:
@@ -97,6 +97,8 @@ class Files:
                     shutil.copy2(file_path, out_file_path)
                 else:
                     shutil.move(file_path, out_file_path)
+                if clean:
+                    Files.remove_empty_folders(os.path.dirname(file_path))
                 Files.write_history(
                     f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')};{file_path};{out_file_path}\n")
             print(f"{file_path}\n> {out_file_path}\n")
