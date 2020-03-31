@@ -19,7 +19,7 @@ def do_rename(file_path: str, **kw: any):
         new_name = Files.process_rules(kw['rules'], kw['cls'].__name__, file.__dict__)
         Files.rename(file_path, kw['output'], new_name, kw['force'], kw['action'], kw['dry_run'], kw['clean'])
     except Exception as e:
-        print(f"Issue while trying to rename: {file_path} ({e})")
+        print(f"Issue for {file_path}: {e}")
 
 
 def do_rollback(file_path: str, **kw: any):

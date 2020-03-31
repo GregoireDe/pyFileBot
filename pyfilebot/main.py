@@ -40,21 +40,20 @@ class File:
     imdb = None
     file_title_movie = None
     file_title_show = None
+
     def __init__(self, file_path: str, non_interactive: bool):
         self.name = os.path.basename(file_path)
         self.file_infos = guessit(self.name)
         self.file_title = self.file_infos["title"]
         if "year" in self.file_infos:
-            self.file_title_show = f'{self.file_infos["title"]} ({self.file_infos["year"]})'
-            self.file_title_movie = f'{self.file_infos["title"]} y:{self.file_infos["year"]}'
+            self.file_title_show = f'{self.file_infos["title"]} y:{self.file_infos["year"]}'
+            self.file_title_movie = f'{self.file_infos["title"]}'
         self.ignore = non_interactive
 
-    def search_database(self, file_title: str, language: str):
+    def search_database(self, language: str):
         """Select into IMDb or TheTVDB the medias based on his title
 
         Args:
-            media_type (str): Movie or ShowEpisode
-            file_title (str): Media title
             language (str): Language for the search
 
         Raises:
@@ -65,11 +64,11 @@ class File:
         """
         if self.__class__.__name__ == "Movie":
             self.imdb = IMDb()
-            r = self.imdb.search_movie(file_title)
+            r = self.imdb.search_movie(self.file_title_movie or self.file_title)
             return r
         else:
             o = tvdb.Search()
-            r = o.series(file_title, language=language)
+            r = o.series(self.file_title_show or self.file_title, language=language)
             return r
 
     def find_infos(self, medias: dict, title: str, max_depth: int = 3):
@@ -87,22 +86,33 @@ class File:
             dict: All infos regarding the media chosen
         """
         if len(medias) == 1:
+            if not isinstance(medias[0], dict):
+                medias[0] = medias[0].__dict__
             return medias[0]
 
+        # l = []
+        # for k, v in list(enumerate(medias))[:max_depth]:
+        #    l.append(medias[k][title].lower())
+        # if len(set(l)) == max_depth:
         for k, v in list(enumerate(medias))[:max_depth]:
+            if not isinstance(medias[k], dict):
+                medias[k] = medias[k].__dict__
             if self.file_title.lower() == medias[k][title].lower():
-                return medias[k].__dict__
+                return medias[k]
             elif distance(self.file_title, medias[k][title]) < 1:
-                return medias[k].__dict__
+                return medias[k]
 
         if not self.ignore:
             print(f"Multiple name found for '{self.file_title}'")
             # No need for more than 6 medias match
             medias = medias[:6]
             for k, v in enumerate(medias):
-                print(f"{k}: {v[title]}")
+                year = f" ({v['year']})" if "year" in v else ''
+                print(f"{k}: {v[title]}{year}")
             n = input("Enter the right one: ")
-            return medias[int(n)].__dict__
+            if not isinstance(medias[int(n)], dict):
+                medias[int(n)] = medias[int(n)].__dict__
+            return medias[int(n)]
         return None
 
     def get_details(self, id: str):
@@ -131,19 +141,17 @@ class Movie(File):
     def __init__(self, file_path: str, non_interactive: bool, language: str, c=None):
         File.__init__(self, file_path, non_interactive)
         # Search IDMB database with file name
-        movies = self.search_database(self.file_title_movie or self.file_title, language)
+        movies = self.search_database(language)
         self.error(movies)
         # Find the best match
         self.infos = self.find_infos(movies, "title")
         self.error(self.infos)
         # Get movie details
         movie_details = self.get_details(self.infos["movieID"])
-
         self.n = self._get_language_title(movie_details, language)
-
         self.n = re.compile(r"(\([0-9]{4}\))").sub('', self.n).strip() if re.findall(r"([0-9]{4})", self.n) else self.n
         self.x = self.file_infos['container']
-        self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0]
+        self.y = re.findall(r"([0-9]{4})", movie_details['original air date'])[0] if 'original air date' in movie_details else movie_details['year']
 
     @staticmethod
     def _get_language_title(movie: imdbMovie, language: str):
@@ -156,19 +164,22 @@ class Movie(File):
         Returns:
             str: Movie title
         """
-        language = language.lower()
-        f2 = helpers.akasLanguages(movie)
-        title = {}
-        for f in f2:
-            f_l = re.findall(r'\w+$|\w+(?=\s\()', f[1])
-            if f_l:
-                l = linguistics.COUNTRY_LANG.get(f_l[0])
-                pylang_name = pycountry.languages.get(name=l)
-                if pylang_name:
-                    title.update({pylang_name.alpha_2: re.findall(r'.*(?=\s\w+\s\()|.*(?=\s\w+)', f[1])[0]})
-        if language in title.keys():
-            return title[language]
-        return movie
+        try:
+            language = language.lower()
+            f2 = helpers.akasLanguages(movie)
+            title = {}
+            for f in f2:
+                f_l = re.findall(r'\w+$|\w+(?=\s\()', f[1])
+                if f_l:
+                    l = linguistics.COUNTRY_LANG.get(f_l[0])
+                    pylang_name = pycountry.languages.get(name=l)
+                    if pylang_name:
+                        title.update({pylang_name.alpha_2: re.findall(r'.*(?=\s\w+\s\()|.*(?=\s\w+)', f[1])[0]})
+            if language in title.keys():
+                return title[language]
+        except Exception as e:
+            pass
+        return movie["title"]
 
 
 class ShowEpisode(File):
@@ -179,7 +190,7 @@ class ShowEpisode(File):
         File.__init__(self, file_path, non_interactive)
         if self.file_title not in c.show.keys():
             # Search TheTVDB database with file name
-            shows = self.search_database(self.file_title_show or self.file_title, language)
+            shows = self.search_database(language)
             self.error(shows)
             # Find the best match
             self.infos = self.find_infos(shows, 'seriesName')
